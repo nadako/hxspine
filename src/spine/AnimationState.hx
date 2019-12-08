@@ -1104,50 +1104,43 @@ class EventQueue {
 			var entry:TrackEntry = objects[i + 1];
 			switch (type) {
 				case EventType.start:
-					if (entry.listener != null && entry.listener.start != null)
+					if (entry.listener != null)
 						entry.listener.start(entry);
-					for (ii in 0...listeners.length)
-						if (listeners[ii].start != null)
-							listeners[ii].start(entry);
+					for (listener in listeners)
+						listener.start(entry);
 				case EventType.interrupt:
-					if (entry.listener != null && entry.listener.interrupt != null)
+					if (entry.listener != null)
 						entry.listener.interrupt(entry);
-					for (ii in 0...listeners.length)
-						if (listeners[ii].interrupt != null)
-							listeners[ii].interrupt(entry);
+					for (listener in listeners)
+						listener.interrupt(entry);
 				case EventType.end:
-					if (entry.listener != null && entry.listener.end != null)
+					if (entry.listener != null)
 						entry.listener.end(entry);
-					for (ii in 0...listeners.length)
-						if (listeners[ii].end != null)
-							listeners[ii].end(entry);
+					for (listener in listeners)
+						listener.end(entry);
 					// Fall through.
-					if (entry.listener != null && entry.listener.dispose != null)
+					if (entry.listener != null)
 						entry.listener.dispose(entry);
-					for (ii in 0...listeners.length)
-						if (listeners[ii].dispose != null)
-							listeners[ii].dispose(entry);
+					for (listener in listeners)
+						listener.dispose(entry);
 					this.animState.trackEntryPool.free(entry);
 				case EventType.dispose:
-					if (entry.listener != null && entry.listener.dispose != null)
+					if (entry.listener != null)
 						entry.listener.dispose(entry);
-					for (ii in 0...listeners.length)
-						if (listeners[ii].dispose != null)
-							listeners[ii].dispose(entry);
+					for (listener in listeners)
+						listener.dispose(entry);
 					this.animState.trackEntryPool.free(entry);
 				case EventType.complete:
-					if (entry.listener != null && entry.listener.complete != null)
+					if (entry.listener != null)
 						entry.listener.complete(entry);
-					for (ii in 0...listeners.length)
-						if (listeners[ii].complete != null)
-							listeners[ii].complete(entry);
+					for (listener in listeners)
+						listener.complete(entry);
 				case EventType.event:
 					var event:Event = objects[i++ + 2];
-					if (entry.listener != null && entry.listener.event != null)
+					if (entry.listener != null)
 						entry.listener.event(entry, event);
-					for (ii in 0...listeners.length)
-						if (listeners[ii].event != null)
-							listeners[ii].event(entry, event);
+					for (listener in listeners)
+						listener.event(entry, event);
 			}
 			i += 2;
 		}
