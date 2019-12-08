@@ -1,0 +1,11 @@
+{
+	"name": "hxspine",
+	"description": "Framework-agnostic Spine run-time",
+	"url": "https://github.com/nadako/hxspine",
+	"tags": ["spine", "animation", "cross"],
+	"license": "MIT",
+	"contributors": ["nadako"],
+	"version": "0.0.1",
+	"releasenote": "Initial release",
+	"classPath": "src"
+}
