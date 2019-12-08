@@ -1,0 +1,19 @@
+language: haxe
+dist: bionic
+haxe: 4.0.3
+install:
+  - haxelib install hxjava
+  - haxelib install hxcs
+script:
+  - haxe build.hxml --interp
+  - haxe build.hxml -js out.js
+  - haxe build.hxml -swf out.swf
+  - haxe build.hxml -java java_out -D no-compilation
+  - haxe build.hxml -java jvm_out -D jvm
+  - haxe build.hxml -cs cs_out -D no-compilation
+  - haxe build.hxml -cpp cpp_out -D no-compilation
+  - haxe build.hxml -php php_out
+  - haxe build.hxml -python out.py
+  - haxe build.hxml -lua out.lua
+  - haxe build.hxml -hl out.hl
+  - haxe build.hxml -hl hlc/main.c -D no-compilation
