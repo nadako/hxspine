@@ -839,20 +839,27 @@ private class BinaryInput {
 		this.bytes = bytes;
 	}
 
-	public function readByte():Int {
+	// we reimplement all the reading functions because we need Big-Endian, not Little-Endian,
+	// and haxe.io.Bytes currently lacks API for this (and haxe.io.BytesInput is a bit of an overkill)
+
+	public inline function readByte():Int {
 		return bytes.get(index++);
 	}
 
+	public function readBoolean():Bool {
+		return readByte() != 0;
+	}
+
 	public function readShort():Int {
-		var value = bytes.getUInt16(index); // TODO: no getInt16 in haxe?
-		index += 2;
-		return value;
+		return (readByte() << 8) | readByte();
 	}
 
 	public function readInt32():Int {
-		var value = bytes.getInt32(index);
-		index += 4;
-		return value;
+		return (readByte() << 24) | (readByte() << 16) | (readByte() << 8) | readByte();
+	}
+
+	public function readFloat():Float {
+		return haxe.io.FPHelper.i32ToFloat(inline readInt32());
 	}
 
 	public function readInt(optimizePositive:Bool):Int {
@@ -909,16 +916,6 @@ private class BinaryInput {
 			}
 		}
 		return chars;
-	}
-
-	public function readFloat():Float {
-		var value = bytes.getFloat(index);
-		index += 4;
-		return value;
-	}
-
-	public function readBoolean():Bool {
-		return readByte() != 0;
 	}
 }
 
