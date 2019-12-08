@@ -1,54 +1,11 @@
 package spine;
 
-/* abstract */ class Texture {
-	/* abstract */ public function getWidth():Int
-		throw "abstract";
-
-	/* abstract */ public function getHeight():Int
-		throw "abstract";
-
-	/* abstract */ public function setFilters(minFilter:TextureFilter, magFilter:TextureFilter)
-		throw "abstract";
-
-	/* abstract */ public function setWraps(uWrap:TextureWrap, vWrap:TextureWrap)
-		throw "abstract";
-
-	/* abstract */ public function dispose()
-		throw "abstract";
-
-	public static function filterFromString(text:String):TextureFilter {
-		switch (text.toLowerCase()) {
-			case "nearest":
-				return TextureFilter.Nearest;
-			case "linear":
-				return TextureFilter.Linear;
-			case "mipmap":
-				return TextureFilter.MipMap;
-			case "mipmapnearestnearest":
-				return TextureFilter.MipMapNearestNearest;
-			case "mipmaplinearnearest":
-				return TextureFilter.MipMapLinearNearest;
-			case "mipmapnearestlinear":
-				return TextureFilter.MipMapNearestLinear;
-			case "mipmaplinearlinear":
-				return TextureFilter.MipMapLinearLinear;
-			default:
-				throw new Error('Unknown texture filter ${text}');
-		}
-	}
-
-	public static function wrapFromString(text:String):TextureWrap {
-		switch (text.toLowerCase()) {
-			case "mirroredtepeat":
-				return TextureWrap.MirroredRepeat;
-			case "clamptoedge":
-				return TextureWrap.ClampToEdge;
-			case "repeat":
-				return TextureWrap.Repeat;
-			default:
-				throw new Error('Unknown texture wrap ${text}');
-		}
-	}
+interface Texture {
+	function getWidth():Int;
+	function getHeight():Int;
+	function setFilters(minFilter:TextureFilter, magFilter:TextureFilter):Void;
+	function setWraps(uWrap:TextureWrap, vWrap:TextureWrap):Void;
+	function dispose():Void;
 }
 
 enum abstract TextureFilter(Int) {
@@ -59,12 +16,34 @@ enum abstract TextureFilter(Int) {
 	var MipMapLinearNearest = 9985; // WebGLRenderingContext.LINEAR_MIPMAP_NEAREST
 	var MipMapNearestLinear = 9986; // WebGLRenderingContext.NEAREST_MIPMAP_LINEAR
 	var MipMapLinearLinear = 9987; // WebGLRenderingContext.LINEAR_MIPMAP_LINEAR
+
+	public static function fromString(text:String):TextureFilter {
+		return switch (text.toLowerCase()) {
+			case "nearest": Nearest;
+			case "linear": Linear;
+			case "mipmap": MipMap;
+			case "mipmapnearestnearest": MipMapNearestNearest;
+			case "mipmaplinearnearest": MipMapLinearNearest;
+			case "mipmapnearestlinear": MipMapNearestLinear;
+			case "mipmaplinearlinear": MipMapLinearLinear;
+			default: throw new Error('Unknown texture filter ${text}');
+		};
+	}
 }
 
 enum abstract TextureWrap(Int) {
 	var MirroredRepeat = 33648; // WebGLRenderingContext.MIRRORED_REPEAT
 	var ClampToEdge = 33071; // WebGLRenderingContext.CLAMP_TO_EDGE
 	var Repeat = 10497; // WebGLRenderingContext.REPEAT
+
+	public static function fromString(text:String):TextureWrap {
+		return switch (text.toLowerCase()) {
+			case "mirroredtepeat": MirroredRepeat;
+			case "clamptoedge": ClampToEdge;
+			case "repeat": Repeat;
+			default: throw new Error('Unknown texture wrap ${text}');
+		};
+	}
 }
 
 class TextureRegion {
@@ -82,7 +61,7 @@ class TextureRegion {
 	public var originalHeight = 0;
 }
 
-class FakeTexture extends Texture {
+class FakeTexture implements Texture {
 	final w:Int;
 	final h:Int;
 
@@ -91,15 +70,17 @@ class FakeTexture extends Texture {
 		this.h = h;
 	}
 
-	override function setFilters(minFilter:TextureFilter, magFilter:TextureFilter) {}
+	public function setFilters(minFilter:TextureFilter, magFilter:TextureFilter) {}
 
-	override function setWraps(uWrap:TextureWrap, vWrap:TextureWrap) {}
+	public function setWraps(uWrap:TextureWrap, vWrap:TextureWrap) {}
 
-	override function dispose() {}
+	public function dispose() {}
 
-	override function getHeight():Int
+	public function getHeight():Int {
 		return h;
+	}
 
-	override function getWidth():Int
+	public function getWidth():Int {
 		return w;
+	}
 }

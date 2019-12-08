@@ -39,8 +39,8 @@ class TextureAtlas implements Disposable {
 				// page.format = Format[tuple[0]]; we don't need format in WebGL
 
 				reader.readTuple(tuple);
-				page.minFilter = Texture.filterFromString(tuple[0]);
-				page.magFilter = Texture.filterFromString(tuple[1]);
+				page.minFilter = TextureFilter.fromString(tuple[0]);
+				page.magFilter = TextureFilter.fromString(tuple[1]);
 
 				var direction = reader.readValue();
 				page.uWrap = TextureWrap.ClampToEdge;
