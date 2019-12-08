@@ -1,32 +1,34 @@
 package spine.utils;
 
 class Pool<T> {
-	var items = new Array<T>();
-	var instantiator:() -> T;
+	final items = new Array<T>();
+	final instantiator:() -> T;
+	final reset:Null<T->Void>;
 
-	public function new(instantiator:() -> T) {
+	public function new(instantiator:() -> T, ?reset:T->Void) {
 		this.instantiator = instantiator;
+		this.reset = reset;
 	}
 
 	public function obtain() {
-		return this.items.length > 0 ? this.items.pop() : this.instantiator();
+		return items.length > 0 ? items.pop() : instantiator();
 	}
 
 	public function free(item:T) {
-		if ((item : Dynamic).reset != null)
-			(item : Dynamic).reset();
-		this.items.push(item);
+		if (reset != null)
+			reset(item);
+		items.push(item);
 	}
 
 	public function freeAll(items:Array<T>) {
 		for (i in 0...items.length) {
-			if ((items[i] : Dynamic).reset != null)
-				(items[i] : Dynamic).reset();
+			if (reset != null)
+				reset(items[i]);
 			this.items[i] = items[i];
 		}
 	}
 
 	public function clear() {
-		this.items.resize(0);
+		items.resize(0);
 	}
 }

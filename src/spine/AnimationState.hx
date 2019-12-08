@@ -72,7 +72,7 @@ class AnimationState {
 	public var propertyIDs = new IntSet();
 	public var animationsChanged = false;
 
-	public var trackEntryPool = new Pool(TrackEntry.new);
+	public var trackEntryPool = new Pool(TrackEntry.new, e -> e.reset());
 
 	public function new(data:AnimationStateData) {
 		this.data = data;
