@@ -36,7 +36,7 @@ class Animation {
 	 * @see `Timeline.apply`.
 	 * @param loop If true, the animation repeats after `duration`.
 	 * @param events May be null to ignore fired events. */
-	public function apply(skeleton:Skeleton, lastTime:Float, time:Float, loop:Bool, events:Array<Event>, alpha:Float, blend:MixBlend, direction:MixDirection) {
+	public function apply(skeleton:Skeleton, lastTime:Float, time:Float, loop:Bool, events:Null<Array<Event>>, alpha:Float, blend:MixBlend, direction:MixDirection) {
 		if (skeleton == null)
 			throw new Error("skeleton cannot be null.");
 

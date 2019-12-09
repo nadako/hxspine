@@ -52,8 +52,7 @@ class Slot {
 		return this.attachment;
 	}
 
-	/** Sets the slot's attachment and, if the attachment changed, resets `attachmentTime` and clears `deform`.
-	 * @param attachment May be null. */
+	/** Sets the slot's attachment and, if the attachment changed, resets `attachmentTime` and clears `deform`. */
 	public function setAttachment(attachment:Null<Attachment>) {
 		if (this.attachment == attachment)
 			return;

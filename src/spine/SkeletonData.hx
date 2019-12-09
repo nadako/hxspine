@@ -5,8 +5,8 @@ package spine;
  * See [Data objects](http://esotericsoftware.com/spine-runtime-architecture#Data-objects) in the Spine Runtimes
  * Guide. */
 class SkeletonData {
-	/** The skeleton's name, which by default is the name of the skeleton data file, if possible. May be null. */
-	public var name:String;
+	/** The skeleton's name, which by default is the name of the skeleton data file, if possible. */
+	public var name:Null<String>;
 
 	/** The skeleton's bones, sorted parent first. The root bone is always the first bone. */
 	public var bones = new Array<BoneData>(); // Ordered parents first.
@@ -18,9 +18,8 @@ class SkeletonData {
 
 	/** The skeleton's default skin. By default this skin contains all attachments that were not in a skin in Spine.
 	 *
-	 * See {@link Skeleton#getAttachmentByName()}.
-	 * May be null. */
-	public var defaultSkin:Skin;
+	 * See `Skeleton.getAttachmentByName`. */
+	public var defaultSkin:Null<Skin>;
 
 	/** The skeleton's events. */
 	public var events = new Array<EventData>();
@@ -52,26 +51,25 @@ class SkeletonData {
 	/** The Spine version used to export the skeleton data, or null. */
 	public var version:String;
 
-	/** The skeleton data hash. This value will change if any of the skeleton data has changed. May be null. */
-	public var hash:String;
+	/** The skeleton data hash. This value will change if any of the skeleton data has changed. */
+	public var hash:Null<String>;
 
 	// Nonessential
 
 	/** The dopesheet FPS in Spine. Available only when nonessential data was exported. */
 	public var fps = 0.0;
 
-	/** The path to the images directory as defined in Spine. Available only when nonessential data was exported. May be null. */
-	public var imagesPath:String;
+	/** The path to the images directory as defined in Spine. Available only when nonessential data was exported. */
+	public var imagesPath:Null<String>;
 
-	/** The path to the audio directory as defined in Spine. Available only when nonessential data was exported. May be null. */
-	public var audioPath:String;
+	/** The path to the audio directory as defined in Spine. Available only when nonessential data was exported. */
+	public var audioPath:Null<String>;
 
 	public function new() {}
 
 	/** Finds a bone by comparing each bone's name. It is more efficient to cache the results of this method than to call it
-	 * multiple times.
-	 * @returns May be null. */
-	public function findBone(boneName:String) {
+	 * multiple times. */
+	public function findBone(boneName:String):Null<BoneData> {
 		if (boneName == null)
 			throw new Error("boneName cannot be null.");
 		for (bone in bones) {
@@ -81,7 +79,7 @@ class SkeletonData {
 		return null;
 	}
 
-	public function findBoneIndex(boneName:String) {
+	public function findBoneIndex(boneName:String):Int {
 		if (boneName == null)
 			throw new Error("boneName cannot be null.");
 		var bones = this.bones;
@@ -92,9 +90,8 @@ class SkeletonData {
 	}
 
 	/** Finds a slot by comparing each slot's name. It is more efficient to cache the results of this method than to call it
-	 * multiple times.
-	 * @returns May be null. */
-	public function findSlot(slotName:String) {
+	 * multiple times. */
+	public function findSlot(slotName:String):Null<SlotData> {
 		if (slotName == null)
 			throw new Error("slotName cannot be null.");
 		for (slot in slots) {
@@ -104,7 +101,7 @@ class SkeletonData {
 		return null;
 	}
 
-	public function findSlotIndex(slotName:String) {
+	public function findSlotIndex(slotName:String):Int {
 		if (slotName == null)
 			throw new Error("slotName cannot be null.");
 		var slots = this.slots;
@@ -115,9 +112,8 @@ class SkeletonData {
 	}
 
 	/** Finds a skin by comparing each skin's name. It is more efficient to cache the results of this method than to call it
-	 * multiple times.
-	 * @returns May be null. */
-	public function findSkin(skinName:String) {
+	 * multiple times. */
+	public function findSkin(skinName:String):Null<Skin> {
 		if (skinName == null)
 			throw new Error("skinName cannot be null.");
 		for (skin in skins) {
@@ -128,9 +124,8 @@ class SkeletonData {
 	}
 
 	/** Finds an event by comparing each events's name. It is more efficient to cache the results of this method than to call it
-	 * multiple times.
-	 * @returns May be null. */
-	public function findEvent(eventDataName:String) {
+	 * multiple times. */
+	public function findEvent(eventDataName:String):Null<EventData> {
 		if (eventDataName == null)
 			throw new Error("eventDataName cannot be null.");
 		for (event in events) {
@@ -141,9 +136,8 @@ class SkeletonData {
 	}
 
 	/** Finds an animation by comparing each animation's name. It is more efficient to cache the results of this method than to
-	 * call it multiple times.
-	 * @returns May be null. */
-	public function findAnimation(animationName:String) {
+	 * call it multiple times. */
+	public function findAnimation(animationName:String):Null<Animation> {
 		if (animationName == null)
 			throw new Error("animationName cannot be null.");
 		for (animation in animations) {
@@ -154,9 +148,8 @@ class SkeletonData {
 	}
 
 	/** Finds an IK constraint by comparing each IK constraint's name. It is more efficient to cache the results of this method
-	 * than to call it multiple times.
-	 * @return May be null. */
-	public function findIkConstraint(constraintName:String) {
+	 * than to call it multiple times. */
+	public function findIkConstraint(constraintName:String):Null<IkConstraintData> {
 		if (constraintName == null)
 			throw new Error("constraintName cannot be null.");
 		for (constraint in ikConstraints) {
@@ -167,9 +160,8 @@ class SkeletonData {
 	}
 
 	/** Finds a transform constraint by comparing each transform constraint's name. It is more efficient to cache the results of
-	 * this method than to call it multiple times.
-	 * @return May be null. */
-	public function findTransformConstraint(constraintName:String) {
+	 * this method than to call it multiple times. */
+	public function findTransformConstraint(constraintName:String):Null<TransformConstraintData> {
 		if (constraintName == null)
 			throw new Error("constraintName cannot be null.");
 		for (constraint in transformConstraints) {
@@ -180,9 +172,8 @@ class SkeletonData {
 	}
 
 	/** Finds a path constraint by comparing each path constraint's name. It is more efficient to cache the results of this method
-	 * than to call it multiple times.
-	 * @return May be null. */
-	public function findPathConstraint(constraintName:String) {
+	 * than to call it multiple times. */
+	public function findPathConstraint(constraintName:String):Null<PathConstraintData> {
 		if (constraintName == null)
 			throw new Error("constraintName cannot be null.");
 		for (constraint in pathConstraints) {
@@ -192,7 +183,7 @@ class SkeletonData {
 		return null;
 	}
 
-	public function findPathConstraintIndex(pathConstraintName:String) {
+	public function findPathConstraintIndex(pathConstraintName:String):Int {
 		if (pathConstraintName == null)
 			throw new Error("pathConstraintName cannot be null.");
 		var pathConstraints = this.pathConstraints;

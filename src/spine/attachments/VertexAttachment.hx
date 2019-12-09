@@ -22,7 +22,7 @@ package spine.attachments;
 	public var worldVerticesLength:Int = 0;
 
 	/** Deform keys for the deform attachment are also applied to this attachment. May be null if no deform keys should be applied. */
-	public var deformAttachment:VertexAttachment;
+	public var deformAttachment:Null<VertexAttachment>;
 
 	function new(name:String) {
 		super(name);

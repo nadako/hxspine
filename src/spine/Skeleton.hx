@@ -1,67 +1,65 @@
 package spine;
 
 import spine.attachments.MeshAttachment;
-import spine.utils.Utils;
 import spine.attachments.RegionAttachment;
 import spine.attachments.PathAttachment;
 import spine.attachments.Attachment;
 import spine.utils.Color;
 import spine.utils.Vector2;
+import spine.utils.Utils;
 
 /** Stores the current pose for a skeleton.
  *
  * See [Instance objects](http://esotericsoftware.com/spine-runtime-architecture#Instance-objects) in the Spine Runtimes Guide. */
 class Skeleton {
 	/** The skeleton's setup pose data. */
-	public var data:SkeletonData;
+	public final data:SkeletonData;
 
 	/** The skeleton's bones, sorted parent first. The root bone is always the first bone. */
-	public var bones:Array<Bone>;
+	public final bones:Array<Bone>;
 
 	/** The skeleton's slots. */
-	public var slots:Array<Slot>;
+	public final slots:Array<Slot>;
 
 	/** The skeleton's slots in the order they should be drawn. The returned array may be modified to change the draw order. */
-	public var drawOrder:Array<Slot>;
+	public final drawOrder:Array<Slot>;
 
 	/** The skeleton's IK constraints. */
-	public var ikConstraints:Array<IkConstraint>;
+	public final ikConstraints:Array<IkConstraint>;
 
 	/** The skeleton's transform constraints. */
-	public var transformConstraints:Array<TransformConstraint>;
+	public final transformConstraints:Array<TransformConstraint>;
 
 	/** The skeleton's path constraints. */
-	public var pathConstraints:Array<PathConstraint>;
+	public final pathConstraints:Array<PathConstraint>;
 
-	/** The list of bones and constraints, sorted in the order they should be updated, as computed by {@link #updateCache()}. */
-	public var _updateCache = new Array<Updatable>();
-
-	public var updateCacheReset = new Array<Updatable>();
-
-	/** The skeleton's current skin. May be null. */
-	public var skin:Skin;
+	/** The skeleton's current skin. */
+	public var skin:Null<Skin>;
 
 	/** The color to tint all the skeleton's attachments. */
 	public var color:Color;
 
-	/** Returns the skeleton's time. This can be used for tracking, such as with Slot {@link Slot#attachmentTime}.
-	 * <p>
-	 * See {@link #update()}. */
-	public var time = 0.0;
+	/** Returns the skeleton's time. This can be used for tracking, such as with Slot `Slot.getAttachmentTime`.
+	 * @see `update`. */
+	public var time:Float = 0.0;
 
 	/** Scales the entire skeleton on the X axis. This affects all bones, even if the bone's transform mode disallows scale
 	 * inheritance. */
-	public var scaleX = 1.0;
+	public var scaleX:Float = 1.0;
 
 	/** Scales the entire skeleton on the Y axis. This affects all bones, even if the bone's transform mode disallows scale
 	 * inheritance. */
-	public var scaleY = 1.0;
+	public var scaleY:Float = 1.0;
 
 	/** Sets the skeleton X position, which is added to the root bone worldX position. */
-	public var x = 0.0;
+	public var x:Float = 0.0;
 
 	/** Sets the skeleton Y position, which is added to the root bone worldY position. */
-	public var y = 0.0;
+	public var y:Float = 0.0;
+
+	/** The list of bones and constraints, sorted in the order they should be updated, as computed by `updateCache`. */
+	final _updateCache = new Array<Updatable>();
+	final updateCacheReset = new Array<Updatable>();
 
 	public function new(data:SkeletonData) {
 		if (data == null)
@@ -109,7 +107,7 @@ class Skeleton {
 		this.updateCache();
 	}
 
-	/** Caches information about bones and constraints. Must be called if the {@link #getSkin()} is modified or if bones,
+	/** Caches information about bones and constraints. Must be called if the `skin` is modified or if bones,
 	 * constraints, or weighted path attachments are added or removed. */
 	public function updateCache() {
 		var updateCache = this._updateCache;
@@ -387,15 +385,13 @@ class Skeleton {
 			slot.setToSetupPose();
 	}
 
-	/** @returns May return null. */
-	public function getRootBone() {
+	public function getRootBone():Null<Bone> {
 		if (this.bones.length == 0)
 			return null;
 		return this.bones[0];
 	}
 
-	/** @returns May be null. */
-	public function findBone(boneName:String) {
+	public function findBone(boneName:String):Null<Bone> {
 		if (boneName == null)
 			throw new Error("boneName cannot be null.");
 		for (bone in bones) {
@@ -406,7 +402,7 @@ class Skeleton {
 	}
 
 	/** @returns -1 if the bone was not found. */
-	public function findBoneIndex(boneName:String) {
+	public function findBoneIndex(boneName:String):Int {
 		if (boneName == null)
 			throw new Error("boneName cannot be null.");
 		var bones = this.bones;
@@ -417,9 +413,8 @@ class Skeleton {
 	}
 
 	/** Finds a slot by comparing each slot's name. It is more efficient to cache the results of this method than to call it
-	 * repeatedly.
-	 * @returns May be null. */
-	public function findSlot(slotName:String) {
+	 * repeatedly. */
+	public function findSlot(slotName:String):Null<Slot> {
 		if (slotName == null)
 			throw new Error("slotName cannot be null.");
 		for (slot in slots) {
@@ -442,7 +437,7 @@ class Skeleton {
 
 	/** Sets a skin by name.
 	 *
-	 * See {@link #setSkin()}. */
+	 * @see `setSkin`. */
 	public function setSkinByName(skinName:String) {
 		var skin = data.findSkin(skinName);
 		if (skin == null)
@@ -458,9 +453,8 @@ class Skeleton {
 	 *
 	 * After changing the skin, the visible attachments can be reset to those attached in the setup pose by calling
 	 * {@link #setSlotsToSetupPose()}. Also, often {@link AnimationState#apply()} is called before the next time the
-	 * skeleton is rendered to allow any attachment keys in the current animation(s) to hide or show attachments from the new skin.
-	 * @param newSkin May be null. */
-	public function setSkin(newSkin:Skin) {
+	 * skeleton is rendered to allow any attachment keys in the current animation(s) to hide or show attachments from the new skin. */
+	public function setSkin(newSkin:Null<Skin>) {
 		if (newSkin == this.skin)
 			return;
 		if (newSkin != null) {
@@ -483,21 +477,18 @@ class Skeleton {
 		this.updateCache();
 	}
 
-	/** Finds an attachment by looking in the {@link #skin} and {@link SkeletonData#defaultSkin} using the slot name and attachment
-	 * name.
+	/** Finds an attachment by looking in the `skin` and `SkeletonData.defaultSkin` using the slot name and attachment name.
 	 *
-	 * See {@link #getAttachment()}.
-	 * @returns May be null. */
-	public function getAttachmentByName(slotName:String, attachmentName:String):Attachment {
+	 * @see `getAttachment`. */
+	public function getAttachmentByName(slotName:String, attachmentName:String):Null<Attachment> {
 		return this.getAttachment(this.data.findSlotIndex(slotName), attachmentName);
 	}
 
 	/** Finds an attachment by looking in the {@link #skin} and {@link SkeletonData#defaultSkin} using the slot index and
 	 * attachment name. First the skin is checked and if the attachment was not found, the default skin is checked.
 	 *
-	 * See [Runtime skins](http://esotericsoftware.com/spine-runtime-skins) in the Spine Runtimes Guide.
-	 * @returns May be null. */
-	public function getAttachment(slotIndex:Int, attachmentName:String):Attachment {
+	 * See [Runtime skins](http://esotericsoftware.com/spine-runtime-skins) in the Spine Runtimes Guide. */
+	public function getAttachment(slotIndex:Int, attachmentName:String):Null<Attachment> {
 		if (attachmentName == null)
 			throw new Error("attachmentName cannot be null.");
 		if (this.skin != null) {
@@ -510,10 +501,10 @@ class Skeleton {
 		return null;
 	}
 
-	/** A convenience method to set an attachment by finding the slot with {@link #findSlot()}, finding the attachment with
-	 * {@link #getAttachment()}, then setting the slot's {@link Slot#attachment}.
+	/** A convenience method to set an attachment by finding the slot with `findSlot`, finding the attachment with
+	 * `getAttachment`, then setting the slot's `Slot.setAttachment`.
 	 * @param attachmentName May be null to clear the slot's attachment. */
-	public function setAttachment(slotName:String, attachmentName:String) {
+	public function setAttachment(slotName:String, attachmentName:Null<String>) {
 		if (slotName == null)
 			throw new Error("slotName cannot be null.");
 		var slots = this.slots;
@@ -534,9 +525,8 @@ class Skeleton {
 	}
 
 	/** Finds an IK constraint by comparing each IK constraint's name. It is more efficient to cache the results of this method
-	 * than to call it repeatedly.
-	 * @return May be null. */
-	public function findIkConstraint(constraintName:String) {
+	 * than to call it repeatedly. */
+	public function findIkConstraint(constraintName:String):Null<IkConstraint> {
 		if (constraintName == null)
 			throw new Error("constraintName cannot be null.");
 		for (ikConstraint in ikConstraints) {
@@ -547,9 +537,8 @@ class Skeleton {
 	}
 
 	/** Finds a transform constraint by comparing each transform constraint's name. It is more efficient to cache the results of
-	 * this method than to call it repeatedly.
-	 * @return May be null. */
-	public function findTransformConstraint(constraintName:String) {
+	 * this method than to call it repeatedly. */
+	public function findTransformConstraint(constraintName:String):Null<TransformConstraint> {
 		if (constraintName == null)
 			throw new Error("constraintName cannot be null.");
 		for (constraint in transformConstraints) {
@@ -560,9 +549,8 @@ class Skeleton {
 	}
 
 	/** Finds a path constraint by comparing each path constraint's name. It is more efficient to cache the results of this method
-	 * than to call it repeatedly.
-	 * @return May be null. */
-	public function findPathConstraint(constraintName:String) {
+	 * than to call it repeatedly. */
+	public function findPathConstraint(constraintName:String):Null<PathConstraint> {
 		if (constraintName == null)
 			throw new Error("constraintName cannot be null.");
 		for (constraint in pathConstraints) {
@@ -620,7 +608,7 @@ class Skeleton {
 		size.set(maxX - minX, maxY - minY);
 	}
 
-	/** Increments the skeleton's {@link #time}. */
+	/** Increments the skeleton's `time`. */
 	public function update(delta:Float) {
 		this.time += delta;
 	}
