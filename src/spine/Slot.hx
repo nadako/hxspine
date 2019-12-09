@@ -3,33 +3,32 @@ package spine;
 import spine.attachments.Attachment;
 import spine.utils.Color;
 
-/** Stores a slot's current pose. Slots organize attachments for {@link Skeleton#drawOrder} purposes and provide a place to store
+/** Stores a slot's current pose. Slots organize attachments for `Skeleton.drawOrder` purposes and provide a place to store
  * state for an attachment. State cannot be stored in an attachment itself because attachments are stateless and may be shared
  * across multiple skeletons. */
 class Slot {
 	/** The slot's setup pose data. */
-	public var data:SlotData;
+	public final data:SlotData;
 
 	/** The bone this slot belongs to. */
-	public var bone:Bone;
+	public final bone:Bone;
 
-	/** The color used to tint the slot's attachment. If {@link #getDarkColor()} is set, this is used as the light color for two
+	/** The color used to tint the slot's attachment. If `darkColor` is set, this is used as the light color for two
 	 * color tinting. */
 	public var color:Color;
 
 	/** The dark color used to tint the slot's attachment for two color tinting, or null if two color tinting is not used. The dark
 	 * color's alpha is not used. */
-	public var darkColor:Color;
+	public var darkColor:Null<Color>;
 
-	var attachment:Attachment;
-
+	var attachment:Null<Attachment>;
 	var attachmentTime:Float;
 
 	/** Values to deform the slot's attachment. For an unweighted mesh, the entries are local positions for each vertex. For a
 	 * weighted mesh, the entries are an offset for each vertex which will be added to the mesh's local vertex positions.
 	 *
-	 * See {@link VertexAttachment#computeWorldVertices()} and {@link DeformTimeline}. */
-	public var deform = new Array<Float>();
+	 * See `VertexAttachment.computeWorldVertices` and `DeformTimeline`. */
+	public final deform = new Array<Float>();
 
 	public function new(data:SlotData, bone:Bone) {
 		if (data == null)
@@ -49,13 +48,13 @@ class Slot {
 	}
 
 	/** The current attachment for the slot, or null if the slot has no attachment. */
-	public function getAttachment():Attachment {
+	public function getAttachment():Null<Attachment> {
 		return this.attachment;
 	}
 
-	/** Sets the slot's attachment and, if the attachment changed, resets {@link #attachmentTime} and clears {@link #deform}.
+	/** Sets the slot's attachment and, if the attachment changed, resets `attachmentTime` and clears `deform`.
 	 * @param attachment May be null. */
-	public function setAttachment(attachment:Attachment) {
+	public function setAttachment(attachment:Null<Attachment>) {
 		if (this.attachment == attachment)
 			return;
 		this.attachment = attachment;
@@ -67,8 +66,7 @@ class Slot {
 		this.attachmentTime = this.bone.skeleton.time - time;
 	}
 
-	/** The time that has elapsed since the last time the attachment was set or cleared. Relies on Skeleton
-	 * {@link Skeleton#time}. */
+	/** The time that has elapsed since the last time the attachment was set or cleared. Relies on `Skeleton.time. */
 	public function getAttachmentTime():Float {
 		return this.bone.skeleton.time - this.attachmentTime;
 	}
