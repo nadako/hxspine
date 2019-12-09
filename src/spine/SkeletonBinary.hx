@@ -7,7 +7,6 @@ import spine.utils.Color;
 import spine.attachments.VertexAttachment;
 import spine.attachments.Attachment;
 import spine.attachments.AttachmentLoader;
-import spine.attachments.AttachmentType;
 import spine.attachments.MeshAttachment;
 import spine.PathConstraintData.RotateMode;
 import spine.PathConstraintData.SpacingMode;
@@ -20,27 +19,6 @@ import spine.BoneData.TransformMode;
  * [JSON and binary data](http://esotericsoftware.com/spine-loading-skeleton-data#JSON-and-binary-data) in the Spine
  * Runtimes Guide. */
 class SkeletonBinary {
-	public static final AttachmentTypeValues = [
-		AttachmentType.Region,
-		AttachmentType.BoundingBox,
-		AttachmentType.Mesh,
-		AttachmentType.LinkedMesh,
-		AttachmentType.Path,
-		AttachmentType.Point,
-		AttachmentType.Clipping,
-	];
-	public static final TransformModeValues = [
-		TransformMode.Normal,
-		TransformMode.OnlyTranslation,
-		TransformMode.NoRotationOrReflection,
-		TransformMode.NoScale,
-		TransformMode.NoScaleOrReflection
-	];
-	public static final PositionModeValues = [PositionMode.Fixed, PositionMode.Percent];
-	public static final SpacingModeValues = [SpacingMode.Length, SpacingMode.Fixed, SpacingMode.Percent];
-	public static final RotateModeValues = [RotateMode.Tangent, RotateMode.Chain, RotateMode.ChainScale];
-	public static final BlendModeValues = [BlendMode.Normal, BlendMode.Additive, BlendMode.Multiply, BlendMode.Screen];
-
 	public static inline final BONE_ROTATE = 0;
 	public static inline final BONE_TRANSLATE = 1;
 	public static inline final BONE_SCALE = 2;
@@ -115,7 +93,7 @@ class SkeletonBinary {
 			data.shearX = input.readFloat();
 			data.shearY = input.readFloat();
 			data.length = input.readFloat() * scale;
-			data.transformMode = SkeletonBinary.TransformModeValues[input.readInt(true)];
+			data.transformMode = cast input.readInt(true);
 			data.skinRequired = input.readBoolean();
 			if (nonessential)
 				Color.rgba8888ToColor(data.color, input.readInt32());
@@ -135,7 +113,7 @@ class SkeletonBinary {
 				Color.rgb888ToColor(data.darkColor = new Color(), darkColor);
 
 			data.attachmentName = input.readStringRef();
-			data.blendMode = SkeletonBinary.BlendModeValues[input.readInt(true)];
+			data.blendMode = cast input.readInt(true);
 			skeletonData.slots.push(data);
 		}
 
@@ -190,9 +168,9 @@ class SkeletonBinary {
 			for (ii in 0...input.readInt(true))
 				data.bones.push(skeletonData.bones[input.readInt(true)]);
 			data.target = skeletonData.slots[input.readInt(true)];
-			data.positionMode = SkeletonBinary.PositionModeValues[input.readInt(true)];
-			data.spacingMode = SkeletonBinary.SpacingModeValues[input.readInt(true)];
-			data.rotateMode = SkeletonBinary.RotateModeValues[input.readInt(true)];
+			data.positionMode = cast input.readInt(true);
+			data.spacingMode = cast input.readInt(true);
+			data.rotateMode = cast input.readInt(true);
 			data.offsetRotation = input.readFloat();
 			data.position = input.readFloat();
 			if (data.positionMode == PositionMode.Fixed)
@@ -303,10 +281,9 @@ class SkeletonBinary {
 		if (name == null)
 			name = attachmentName;
 
-		var typeIndex = input.readByte();
-		var type = SkeletonBinary.AttachmentTypeValues[typeIndex];
+		var type:AttachmentType = cast input.readByte();
 		switch (type) {
-			case AttachmentType.Region:
+			case Region:
 				{
 					var path = input.readStringRef();
 					var rotation = input.readFloat();
@@ -335,7 +312,7 @@ class SkeletonBinary {
 					region.updateOffset();
 					return region;
 				}
-			case AttachmentType.BoundingBox:
+			case BoundingBox:
 				{
 					var vertexCount = input.readInt(true);
 					var vertices = this.readVertices(input, vertexCount);
@@ -351,7 +328,7 @@ class SkeletonBinary {
 						Color.rgba8888ToColor(box.color, color);
 					return box;
 				}
-			case AttachmentType.Mesh:
+			case Mesh:
 				{
 					var path = input.readStringRef();
 					var color = input.readInt32();
@@ -389,7 +366,7 @@ class SkeletonBinary {
 					}
 					return mesh;
 				}
-			case AttachmentType.LinkedMesh:
+			case LinkedMesh:
 				{
 					var path = input.readStringRef();
 					var color = input.readInt32();
@@ -416,7 +393,7 @@ class SkeletonBinary {
 					this.linkedMeshes.push(new LinkedMesh(mesh, skinName, slotIndex, parent, inheritDeform));
 					return mesh;
 				}
-			case AttachmentType.Path:
+			case Path:
 				{
 					var closed = input.readBoolean();
 					var constantSpeed = input.readBoolean();
@@ -440,7 +417,7 @@ class SkeletonBinary {
 						Color.rgba8888ToColor(path.color, color);
 					return path;
 				}
-			case AttachmentType.Point:
+			case Point:
 				{
 					var rotation = input.readFloat();
 					var x = input.readFloat();
@@ -457,7 +434,7 @@ class SkeletonBinary {
 						Color.rgba8888ToColor(point.color, color);
 					return point;
 				}
-			case AttachmentType.Clipping:
+			case Clipping:
 				{
 					var endSlotIndex = input.readInt(true);
 					var vertexCount = input.readInt(true);
@@ -940,4 +917,14 @@ private class Vertices {
 	public var vertices:Array<Float>;
 
 	public function new() {}
+}
+
+private enum abstract AttachmentType(Int) {
+	var Region;
+	var BoundingBox;
+	var Mesh;
+	var LinkedMesh;
+	var Path;
+	var Point;
+	var Clipping;
 }

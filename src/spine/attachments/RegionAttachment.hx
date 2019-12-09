@@ -54,48 +54,46 @@ class RegionAttachment extends Attachment {
 	public static inline final V4 = 31;
 
 	/** The local x translation. */
-	public var x = 0.0;
+	public var x:Float = 0.0;
 
 	/** The local y translation. */
-	public var y = 0.0;
+	public var y:Float = 0.0;
 
 	/** The local scaleX. */
-	public var scaleX = 1.0;
+	public var scaleX:Float = 1.0;
 
 	/** The local scaleY. */
-	public var scaleY = 1.0;
+	public var scaleY:Float = 1.0;
 
 	/** The local rotation. */
-	public var rotation = 0.0;
+	public var rotation:Float = 0.0;
 
 	/** The width of the region attachment in Spine. */
-	public var width = 0.0;
+	public var width:Float = 0.0;
 
 	/** The height of the region attachment in Spine. */
-	public var height = 0.0;
+	public var height:Float = 0.0;
 
 	/** The color to tint the region attachment. */
-	public var color = new Color(1, 1, 1, 1);
+	public var color:Color = new Color(1, 1, 1, 1);
 
 	/** The name of the texture region for this attachment. */
 	public var path:String;
 
 	public var region:TextureRegion;
 
-	/** For each of the 4 vertices, a pair of <code>x,y</code> values that is the local position of the vertex.
+	/** For each of the 4 vertices, a pair of `x,y` values that is the local position of the vertex.
 	 *
-	 * See {@link #updateOffset()}. */
-	public var offset = Utils.newFloatArray(8);
+	 * @see `updateOffset`. */
+	public final offset = Utils.newFloatArray(8);
 
-	public var uvs = Utils.newFloatArray(8);
-
-	public var tempColor = new Color(1, 1, 1, 1);
+	public final uvs = Utils.newFloatArray(8);
 
 	public function new(name:String) {
 		super(name);
 	}
 
-	/** Calculates the {@link #offset} using the region settings. Must be called after changing region settings. */
+	/** Calculates the `offset` using the region settings. Must be called after changing region settings. */
 	public function updateOffset() {
 		var regionScaleX = this.width / this.region.originalWidth * this.scaleX;
 		var regionScaleY = this.height / this.region.originalHeight * this.scaleY;

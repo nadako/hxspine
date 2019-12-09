@@ -20,7 +20,7 @@ class MeshAttachment extends VertexAttachment {
 
 	/** The UV pair for each vertex, normalized within the entire texture.
 	 *
-	 * See {@link #updateUVs}. */
+	 * See `updateUVs`. */
 	public var uvs:Array<Float>;
 
 	/** Triplets of vertex indices which describe the mesh's triangulation. */
@@ -35,23 +35,20 @@ class MeshAttachment extends VertexAttachment {
 	/** The height of the mesh's image. Available only when nonessential data was exported. */
 	public var height:Float;
 
-	/** The number of entries at the beginning of {@link #vertices} that make up the mesh hull. */
+	/** The number of entries at the beginning of `vertices` that make up the mesh hull. */
 	public var hullLength:Float;
 
 	/** Vertex index pairs describing edges for controling triangulation. Mesh triangles will never cross edges. Only available if
 	 * nonessential data was exported. Triangulation is not performed at runtime. */
-	public var edges:Array<Int>;
+	public var edges:Null<Array<Int>>;
 
-	var parentMesh:MeshAttachment;
-
-	public var tempColor = new Color(0, 0, 0, 0);
+	var parentMesh:Null<MeshAttachment>;
 
 	public function new(name:String) {
 		super(name);
 	}
 
-	/** Calculates {@link #uvs} using {@link #regionUVs} and the {@link #region}. Must be called after changing the region UVs or
-	 * region. */
+	/** Calculates `uvs` using `regionUVs` and the `region`. Must be called after changing the region UVs or region. */
 	public function updateUVs() {
 		var regionUVs = this.regionUVs;
 		if (this.uvs == null || this.uvs.length != regionUVs.length)
@@ -121,15 +118,14 @@ class MeshAttachment extends VertexAttachment {
 		}
 	}
 
-	/** The parent mesh if this is a linked mesh, else null. A linked mesh shares the {@link #bones}, {@link #vertices},
-	 * {@link #regionUVs}, {@link #triangles}, {@link #hullLength}, {@link #edges}, {@link #width}, and {@link #height} with the
-	 * parent mesh, but may have a different {@link #name} or {@link #path} (and therefore a different texture). */
-	public function getParentMesh() {
-		return this.parentMesh;
+	/** The parent mesh if this is a linked mesh, else null. A linked mesh shares the `bones`, `vertices`,
+	 * `regionUVs`, `triangles`, `hullLength`, `edges`, `width`, and `height` with the parent mesh,
+	 * but may have a different `name` or `path` (and therefore a different texture). */
+	public inline function getParentMesh():Null<MeshAttachment> {
+		return parentMesh;
 	}
 
-	/** @param parentMesh May be null. */
-	public function setParentMesh(parentMesh:MeshAttachment) {
+	public function setParentMesh(parentMesh:Null<MeshAttachment>) {
 		this.parentMesh = parentMesh;
 		if (parentMesh != null) {
 			this.bones = parentMesh.bones;
@@ -143,8 +139,8 @@ class MeshAttachment extends VertexAttachment {
 	}
 
 	override function copy():MeshAttachment {
-		if (this.parentMesh != null)
-			return this.newLinkedMesh();
+		if (parentMesh != null)
+			return newLinkedMesh();
 
 		var copy = new MeshAttachment(this.name);
 		copy.region = this.region;
@@ -167,7 +163,7 @@ class MeshAttachment extends VertexAttachment {
 		return copy;
 	}
 
-	/** Returns a new mesh with the {@link #parentMesh} set to this mesh's parent mesh, if any, else to this mesh. **/
+	/** Returns a new mesh with the `parentMesh` set to this mesh's parent mesh, if any, else to this mesh. **/
 	public function newLinkedMesh():MeshAttachment {
 		var copy = new MeshAttachment(this.name);
 		copy.region = this.region;
