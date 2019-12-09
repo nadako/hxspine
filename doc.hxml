@@ -1,0 +1,8 @@
+build.hxml
+--interp
+-D doc-gen
+-xml doc/interp.xml
+
+--next
+
+-cmd haxelib run dox -o doc/out -i doc --title "Framework-agnostic Spine run-time for Haxe" --toplevel-package spine -D source-path https://github.com/nadako/hxspine/blob/master/src

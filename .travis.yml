@@ -17,3 +17,13 @@ script:
   - haxe build.hxml -lua out.lua
   - haxe build.hxml -hl out.hl
   - haxe build.hxml -hl hlc/main.c -D no-compilation
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN
+  local-dir: doc/out
+  on:
+    branch: master
+before_deploy:
+  - haxelib install dox
+  - haxe doc.hxml
