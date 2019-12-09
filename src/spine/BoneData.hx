@@ -2,16 +2,15 @@ package spine;
 
 import spine.utils.Color;
 
-/** Stores the setup pose for a {@link Bone}. */
+/** Stores the setup pose for a `Bone`. */
 class BoneData {
-	/** The index of the bone in {@link Skeleton#getBones()}. */
-	public var index:Int;
+	/** The index of the bone in `Skeleton.bones`. */
+	public final index:Int;
 
-	/** The name of the bone, which is unique across all bones in the skeleton. */
-	public var name:String;
+	/** The name of the bone, which is unique within the skeleton. */
+	public final name:String;
 
-	/** @returns May be null. */
-	public var parent:BoneData;
+	public final parent:Null<BoneData>;
 
 	/** The bone's length. */
 	public var length:Float;
@@ -40,16 +39,14 @@ class BoneData {
 	/** The transform mode for how parent world transforms affect this bone. */
 	public var transformMode:TransformMode = Normal;
 
-	/** When true, {@link Skeleton#updateWorldTransform()} only updates this bone if the {@link Skeleton#skin} contains this
-	 * bone.
-	 * @see Skin#bones */
+	/** When true, `Skeleton.updateWorldTransform` only updates this bone if the`Skeleton.skin` contains this bone.
+	 * @see `Skin.bones` */
 	public var skinRequired:Bool = false;
 
-	/** The color of the bone as it was in Spine. Available only when nonessential data was exported. Bones are not usually
-	 * rendered at runtime. */
+	/** The color of the bone as it was in Spine. Available only when nonessential data was exported. Bones are not usually rendered at runtime. */
 	public var color:Color = new Color();
 
-	public function new(index:Int, name:String, parent:BoneData) {
+	public function new(index:Int, name:String, parent:Null<BoneData>) {
 		if (index < 0)
 			throw new Error("index must be >= 0.");
 		if (name == null)
