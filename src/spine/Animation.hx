@@ -135,24 +135,6 @@ enum abstract MixDirection(Int) {
 	var mixOut;
 }
 
-enum abstract TimelineType(Int) to Int {
-	var rotate;
-	var translate;
-	var scale;
-	var shear;
-	var attachment;
-	var color;
-	var deform;
-	var event;
-	var drawOrder;
-	var ikConstraint;
-	var transformConstraint;
-	var pathConstraintPosition;
-	var pathConstraintSpacing;
-	var pathConstraintMix;
-	var twoColor;
-}
-
 /** The base class for timelines that use interpolation between key frame values. */
 /* abstract */ class CurveTimeline implements Timeline {
 	public static inline final LINEAR = 0;
@@ -1605,4 +1587,22 @@ class PathConstraintMixTimeline extends CurveTimeline {
 			constraint.translateMix += (translate - constraint.translateMix) * alpha;
 		}
 	}
+}
+
+private enum abstract TimelineType(Int) to Int {
+	var rotate;
+	var translate;
+	var scale;
+	var shear;
+	var attachment;
+	var color;
+	var deform;
+	var event;
+	var drawOrder;
+	var ikConstraint;
+	var transformConstraint;
+	var pathConstraintPosition;
+	var pathConstraintSpacing;
+	var pathConstraintMix;
+	var twoColor;
 }
