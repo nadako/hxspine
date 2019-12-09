@@ -8,10 +8,6 @@ import spine.attachments.VertexAttachment;
 import spine.attachments.Attachment;
 import spine.attachments.AttachmentLoader;
 import spine.attachments.MeshAttachment;
-import spine.PathConstraintData.RotateMode;
-import spine.PathConstraintData.SpacingMode;
-import spine.PathConstraintData.PositionMode;
-import spine.BoneData.TransformMode;
 
 /** Loads skeleton data in the Spine binary format.
  *
@@ -19,22 +15,22 @@ import spine.BoneData.TransformMode;
  * [JSON and binary data](http://esotericsoftware.com/spine-loading-skeleton-data#JSON-and-binary-data) in the Spine
  * Runtimes Guide. */
 class SkeletonBinary {
-	public static inline final BONE_ROTATE = 0;
-	public static inline final BONE_TRANSLATE = 1;
-	public static inline final BONE_SCALE = 2;
-	public static inline final BONE_SHEAR = 3;
+	static inline final BONE_ROTATE = 0;
+	static inline final BONE_TRANSLATE = 1;
+	static inline final BONE_SCALE = 2;
+	static inline final BONE_SHEAR = 3;
 
-	public static inline final SLOT_ATTACHMENT = 0;
-	public static inline final SLOT_COLOR = 1;
-	public static inline final SLOT_TWO_COLOR = 2;
+	static inline final SLOT_ATTACHMENT = 0;
+	static inline final SLOT_COLOR = 1;
+	static inline final SLOT_TWO_COLOR = 2;
 
-	public static inline final PATH_POSITION = 0;
-	public static inline final PATH_SPACING = 1;
-	public static inline final PATH_MIX = 2;
+	static inline final PATH_POSITION = 0;
+	static inline final PATH_SPACING = 1;
+	static inline final PATH_MIX = 2;
 
-	public static inline final CURVE_LINEAR = 0;
-	public static inline final CURVE_STEPPED = 1;
-	public static inline final CURVE_BEZIER = 2;
+	static inline final CURVE_LINEAR = 0;
+	static inline final CURVE_STEPPED = 1;
+	static inline final CURVE_BEZIER = 2;
 
 	/** Scales bone positions, image sizes, and translations as they are loaded. This allows different size images to be used at
 	 * runtime than were used in Spine.
@@ -42,9 +38,8 @@ class SkeletonBinary {
 	 * See [Scaling](http://esotericsoftware.com/spine-loading-skeleton-data#Scaling) in the Spine Runtimes Guide. */
 	public var scale = 1.0;
 
-	public var attachmentLoader:AttachmentLoader;
-
-	var linkedMeshes = new Array<LinkedMesh>();
+	final attachmentLoader:AttachmentLoader;
+	final linkedMeshes = new Array<LinkedMesh>();
 
 	public function new(attachmentLoader:AttachmentLoader) {
 		this.attachmentLoader = attachmentLoader;
@@ -173,10 +168,10 @@ class SkeletonBinary {
 			data.rotateMode = cast input.readInt(true);
 			data.offsetRotation = input.readFloat();
 			data.position = input.readFloat();
-			if (data.positionMode == PositionMode.Fixed)
+			if (data.positionMode == Fixed)
 				data.position *= scale;
 			data.spacing = input.readFloat();
-			if (data.spacingMode == SpacingMode.Length || data.spacingMode == SpacingMode.Fixed)
+			if (data.spacingMode == Length || data.spacingMode == Fixed)
 				data.spacing *= scale;
 			data.rotateMix = input.readFloat();
 			data.translateMix = input.readFloat();
@@ -517,7 +512,7 @@ class SkeletonBinary {
 				var timelineType = input.readByte();
 				var frameCount = input.readInt(true);
 				switch (timelineType) {
-					case SkeletonBinary.SLOT_ATTACHMENT:
+					case SLOT_ATTACHMENT:
 						{
 							var timeline = new AttachmentTimeline(frameCount);
 							timeline.slotIndex = slotIndex;
@@ -526,7 +521,7 @@ class SkeletonBinary {
 							timelines.push(timeline);
 							duration = Math.max(duration, timeline.frames[frameCount - 1]);
 						}
-					case SkeletonBinary.SLOT_COLOR:
+					case SLOT_COLOR:
 						{
 							var timeline = new ColorTimeline(frameCount);
 							timeline.slotIndex = slotIndex;
@@ -540,7 +535,7 @@ class SkeletonBinary {
 							timelines.push(timeline);
 							duration = Math.max(duration, timeline.frames[(frameCount - 1) * ColorTimeline.ENTRIES]);
 						}
-					case SkeletonBinary.SLOT_TWO_COLOR:
+					case SLOT_TWO_COLOR:
 						{
 							var timeline = new TwoColorTimeline(frameCount);
 							timeline.slotIndex = slotIndex;
@@ -567,7 +562,7 @@ class SkeletonBinary {
 				var timelineType = input.readByte();
 				var frameCount = input.readInt(true);
 				switch (timelineType) {
-					case SkeletonBinary.BONE_ROTATE:
+					case BONE_ROTATE:
 						{
 							var timeline = new RotateTimeline(frameCount);
 							timeline.boneIndex = boneIndex;
@@ -579,13 +574,13 @@ class SkeletonBinary {
 							timelines.push(timeline);
 							duration = Math.max(duration, timeline.frames[(frameCount - 1) * RotateTimeline.ENTRIES]);
 						}
-					case SkeletonBinary.BONE_TRANSLATE | SkeletonBinary.BONE_SCALE | SkeletonBinary.BONE_SHEAR:
+					case BONE_TRANSLATE | BONE_SCALE | BONE_SHEAR:
 						{
 							var timeline:TranslateTimeline;
 							var timelineScale = 1.0;
-							if (timelineType == SkeletonBinary.BONE_SCALE)
+							if (timelineType == BONE_SCALE)
 								timeline = new ScaleTimeline(frameCount);
-							else if (timelineType == SkeletonBinary.BONE_SHEAR)
+							else if (timelineType == BONE_SHEAR)
 								timeline = new ShearTimeline(frameCount);
 							else {
 								timeline = new TranslateTimeline(frameCount);
@@ -643,17 +638,17 @@ class SkeletonBinary {
 				var timelineType = input.readByte();
 				var frameCount = input.readInt(true);
 				switch (timelineType) {
-					case SkeletonBinary.PATH_POSITION | SkeletonBinary.PATH_SPACING:
+					case PATH_POSITION | PATH_SPACING:
 						{
 							var timeline:PathConstraintPositionTimeline;
 							var timelineScale = 1.0;
-							if (timelineType == SkeletonBinary.PATH_SPACING) {
+							if (timelineType == PATH_SPACING) {
 								timeline = new PathConstraintSpacingTimeline(frameCount);
-								if (data.spacingMode == SpacingMode.Length || data.spacingMode == SpacingMode.Fixed)
+								if (data.spacingMode == Length || data.spacingMode == Fixed)
 									timelineScale = scale;
 							} else {
 								timeline = new PathConstraintPositionTimeline(frameCount);
-								if (data.positionMode == PositionMode.Fixed)
+								if (data.positionMode == Fixed)
 									timelineScale = scale;
 							}
 							timeline.pathConstraintIndex = index;
@@ -665,7 +660,7 @@ class SkeletonBinary {
 							timelines.push(timeline);
 							duration = Math.max(duration, timeline.frames[(frameCount - 1) * PathConstraintPositionTimeline.ENTRIES]);
 						}
-					case SkeletonBinary.PATH_MIX:
+					case PATH_MIX:
 						{
 							var timeline = new PathConstraintMixTimeline(frameCount);
 							timeline.pathConstraintIndex = index;
@@ -794,15 +789,11 @@ class SkeletonBinary {
 
 	function readCurve(input:BinaryInput, frameIndex:Int, timeline:CurveTimeline) {
 		switch (input.readByte()) {
-			case SkeletonBinary.CURVE_STEPPED:
+			case CURVE_STEPPED:
 				timeline.setStepped(frameIndex);
-			case SkeletonBinary.CURVE_BEZIER:
-				setCurve(timeline, frameIndex, input.readFloat(), input.readFloat(), input.readFloat(), input.readFloat());
+			case CURVE_BEZIER:
+				timeline.setCurve(frameIndex, input.readFloat(), input.readFloat(), input.readFloat(), input.readFloat());
 		}
-	}
-
-	public function setCurve(timeline:CurveTimeline, frameIndex:Int, cx1:Float, cy1:Float, cx2:Float, cy2:Float) {
-		timeline.setCurve(frameIndex, cx1, cy1, cx2, cy2);
 	}
 }
 
