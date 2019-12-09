@@ -2,27 +2,27 @@ package spine;
 
 import spine.utils.Color;
 
-/** Stores the setup pose for a {@link Slot}. */
+/** Stores the setup pose for a `Slot`. */
 class SlotData {
-	/** The index of the slot in {@link Skeleton#getSlots()}. */
-	public var index:Int;
+	/** The index of the slot in `Skeleton.slots`. */
+	public final index:Int;
 
 	/** The name of the slot, which is unique across all slots in the skeleton. */
-	public var name:String;
+	public final name:String;
 
 	/** The bone this slot belongs to. */
-	public var boneData:BoneData;
+	public final boneData:BoneData;
 
-	/** The color used to tint the slot's attachment. If {@link #getDarkColor()} is set, this is used as the light color for two
+	/** The color used to tint the slot's attachment. If `darkColor` is set, this is used as the light color for two
 	 * color tinting. */
 	public var color = new Color(1, 1, 1, 1);
 
 	/** The dark color used to tint the slot's attachment for two color tinting, or null if two color tinting is not used. The dark
 	 * color's alpha is not used. */
-	public var darkColor:Color;
+	public var darkColor:Null<Color>;
 
 	/** The name of the attachment that is visible for this slot in the setup pose, or null if no attachment is visible. */
-	public var attachmentName:String;
+	public var attachmentName:Null<String>;
 
 	/** The blend mode for drawing the slot's attachment. */
 	public var blendMode:BlendMode;
