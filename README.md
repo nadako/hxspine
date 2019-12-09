@@ -1,4 +1,4 @@
-# hxspine - Framework-agnostic Spine run-time for Haxe
+# hxspine - Generic Spine run-time for Haxe
 
 [![Build Status](https://travis-ci.org/nadako/hxspine.svg?branch=master)](https://travis-ci.org/nadako/hxspine)
 
