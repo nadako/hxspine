@@ -1,19 +1,20 @@
 package spine;
 
-import spine.utils.MathUtils;
 import spine.attachments.VertexAttachment;
+import spine.utils.MathUtils;
 import spine.utils.Utils;
 
 /** A simple container for a list of timelines and a name. */
 class Animation {
 	/** The animation's name, which is unique across all animations in the skeleton. */
-	public var name:String;
+	public final name:String;
 
-	public var timelines:Array<Timeline>;
-	public var timelineIds:Map<Int, Bool>;
+	public final timelines:Array<Timeline>;
 
 	/** The duration of the animation in seconds, which is the highest time of all keys in the timeline. */
 	public var duration:Float;
+
+	final timelineIds:Map<Int, Bool>;
 
 	public function new(name:String, timelines:Array<Timeline>, duration:Float) {
 		if (name == null)
@@ -22,9 +23,7 @@ class Animation {
 			throw new Error("timelines cannot be null.");
 		this.name = name;
 		this.timelines = timelines;
-		this.timelineIds = new Map();
-		for (timeline in timelines)
-			this.timelineIds[timeline.getPropertyId()] = true;
+		this.timelineIds = [for (timeline in timelines) timeline.getPropertyId() => true];
 		this.duration = duration;
 	}
 
@@ -34,8 +33,8 @@ class Animation {
 
 	/** Applies all the animation's timelines to the specified skeleton.
 	 *
-	 * See Timeline {@link Timeline#apply(Skeleton, float, float, Array, float, MixBlend, MixDirection)}.
-	 * @param loop If true, the animation repeats after {@link #getDuration()}.
+	 * @see `Timeline.apply`.
+	 * @param loop If true, the animation repeats after `duration`.
 	 * @param events May be null to ignore fired events. */
 	public function apply(skeleton:Skeleton, lastTime:Float, time:Float, loop:Bool, events:Array<Event>, alpha:Float, blend:MixBlend, direction:MixDirection) {
 		if (skeleton == null)
@@ -86,7 +85,7 @@ interface Timeline {
 	/** Applies this timeline to the skeleton.
 	 * @param skeleton The skeleton the timeline is being applied to. This provides access to the bones, slots, and other
 	 *           skeleton components the timeline may change.
-	 * @param lastTime The time this timeline was last applied. Timelines such as {@link EventTimeline}} trigger only at specific
+	 * @param lastTime The time this timeline was last applied. Timelines such as `EventTimeline` trigger only at specific
 	 *           times rather than every frame. In that case, the timeline triggers everything between `lastTime`
 	 *           (exclusive) and `time` (inclusive).
 	 * @param time The time within the animation. Most timelines find the key before and the key after this time so they can
@@ -99,25 +98,24 @@ interface Timeline {
 	 *           apply animations on top of each other (layering).
 	 * @param blend Controls how mixing is applied when `alpha` < 1.
 	 * @param direction Indicates whether the timeline is mixing in or out. Used by timelines which perform instant transitions,
-	 *           such as {@link DrawOrderTimeline} or {@link AttachmentTimeline}. */
+	 *           such as `DrawOrderTimeline` or `AttachmentTimeline`. */
 	function apply(skeleton:Skeleton, lastTime:Float, time:Float, events:Array<Event>, alpha:Float, blend:MixBlend, direction:MixDirection):Void;
 
 	/** Uniquely encodes both the type of this timeline and the skeleton property that it affects. */
 	function getPropertyId():Int;
 }
 
-/** Controls how a timeline value is mixed with the setup pose value or current pose value when a timeline's `alpha`
- * < 1.
+/** Controls how a timeline value is mixed with the setup pose value or current pose value when a timeline's `alpha` < 1.
  *
- * See Timeline {@link Timeline#apply(Skeleton, float, float, Array, float, MixBlend, MixDirection)}. */
+ * @see `Timeline.apply`. */
 enum abstract MixBlend(Int) {
 	/** Transitions from the setup value to the timeline value (the current value is not used). Before the first key, the setup
 	 * value is set. */
 	var setup;
 
 	/** Transitions from the current value to the timeline value. Before the first key, transitions from the current value to
-	 * the setup value. Timelines which perform instant transitions, such as {@link DrawOrderTimeline} or
-	 * {@link AttachmentTimeline}, use the setup value before the first key.
+	 * the setup value. Timelines which perform instant transitions, such as `DrawOrderTimeline` or
+	 * `AttachmentTimeline`, use the setup value before the first key.
 	 *
 	 * `first` is intended for the first animations applied, not for animations layered on top of those. */
 	var first;
@@ -140,7 +138,7 @@ enum abstract MixBlend(Int) {
 /** Indicates whether a timeline's `alpha` is mixing out over time toward 0 (the setup or current pose value) or
  * mixing in toward 1 (the timeline's value).
  *
- * See Timeline {@link Timeline#apply(Skeleton, float, float, Array, float, MixBlend, MixDirection)}. */
+ * @see `Timeline.apply`. */
 enum abstract MixDirection(Int) {
 	var mixIn;
 	var mixOut;
@@ -165,13 +163,13 @@ enum abstract TimelineType(Int) to Int {
 }
 
 /** The base class for timelines that use interpolation between key frame values. */
-/* abstract  */ class CurveTimeline implements Timeline {
+/* abstract */ class CurveTimeline implements Timeline {
 	public static inline final LINEAR = 0;
 	public static inline final STEPPED = 1;
 	public static inline final BEZIER = 2;
 	public static inline final BEZIER_SIZE = 10 * 2 - 1;
 
-	var curves:Array<Float>; // type, x, y, ...
+	final curves:Array<Float>; // type, x, y, ...
 
 	/* abstract */ public function getPropertyId():Int
 		throw "abstract";
@@ -275,23 +273,25 @@ enum abstract TimelineType(Int) to Int {
 		return y + (1 - y) * (percent - x) / (1 - x); // Last point is 1,1.
 	}
 
+	/** Applies this timeline to the skeleton.
+	 * @see `Timeline.apply` */
 	/* abstract */ public function apply(skeleton:Skeleton, lastTime:Float, time:Float, events:Array<Event>, alpha:Float, blend:MixBlend,
 			direction:MixDirection)
 		throw "abstract";
 }
 
-/** Changes a bone's local {@link Bone#rotation}. */
+/** Changes a bone's local `Bone.rotation`. */
 class RotateTimeline extends CurveTimeline {
 	public static inline final ENTRIES = 2;
 	public static inline final PREV_TIME = -2;
 	public static inline final PREV_ROTATION = -1;
 	public static inline final ROTATION = 1;
 
-	/** The index of the bone in {@link Skeleton#bones} that will be changed. */
+	/** The index of the bone in `Skeleton.bones` that will be changed. */
 	public var boneIndex:Int;
 
 	/** The time in seconds and rotation in degrees for each key frame. */
-	public var frames:Array<Float>; // time, degrees, ...
+	public final frames:Array<Float>; // time, degrees, ...
 
 	public function new(frameCount:Int) {
 		super(frameCount);
@@ -362,7 +362,7 @@ class RotateTimeline extends CurveTimeline {
 	}
 }
 
-/** Changes a bone's local {@link Bone#x} and {@link Bone#y}. */
+/** Changes a bone's local `Bone.x` and `Bone.y` */
 class TranslateTimeline extends CurveTimeline {
 	public static inline final ENTRIES = 3;
 	public static inline final PREV_TIME = -3;
@@ -371,11 +371,11 @@ class TranslateTimeline extends CurveTimeline {
 	public static inline final X = 1;
 	public static inline final Y = 2;
 
-	/** The index of the bone in {@link Skeleton#bones} that will be changed. */
+	/** The index of the bone in `Skeleton.bones` that will be changed. */
 	public var boneIndex:Int;
 
 	/** The time in seconds, x, and y values for each key frame. */
-	public var frames:Array<Float>; // time, x, y, ...
+	public final frames:Array<Float>; // time, x, y, ...
 
 	public function new(frameCount:Int) {
 		super(frameCount);
@@ -443,7 +443,7 @@ class TranslateTimeline extends CurveTimeline {
 	}
 }
 
-/** Changes a bone's local {@link Bone#scaleX)} and {@link Bone#scaleY}. */
+/** Changes a bone's local `Bone.scaleX` and `Bone.scaleY`. */
 class ScaleTimeline extends TranslateTimeline {
 	public function new(frameCount:Int) {
 		super(frameCount);
@@ -539,7 +539,7 @@ class ScaleTimeline extends TranslateTimeline {
 	}
 }
 
-/** Changes a bone's local {@link Bone#shearX} and {@link Bone#shearY}. */
+/** Changes a bone's local `Bone.shearX` and `Bone.shearY`. */
 class ShearTimeline extends TranslateTimeline {
 	public function new(frameCount:Int) {
 		super(frameCount);
@@ -598,7 +598,7 @@ class ShearTimeline extends TranslateTimeline {
 	}
 }
 
-/** Changes a slot's {@link Slot#color}. */
+/** Changes a slot's `Slot.color`. */
 class ColorTimeline extends CurveTimeline {
 	public static inline final ENTRIES = 5;
 	public static inline final PREV_TIME = -5;
@@ -611,11 +611,11 @@ class ColorTimeline extends CurveTimeline {
 	public static inline final B = 3;
 	public static inline final A = 4;
 
-	/** The index of the slot in {@link Skeleton#slots} that will be changed. */
+	/** The index of the slot in `Skeleton.slots` that will be changed. */
 	public var slotIndex:Int;
 
 	/** The time in seconds, red, green, blue, and alpha values for each key frame. */
-	public var frames:Array<Float>; // time, r, g, b, a, ...
+	public final frames:Array<Float>; // time, r, g, b, a, ...
 
 	public function new(frameCount:Int) {
 		super(frameCount);
@@ -687,7 +687,7 @@ class ColorTimeline extends CurveTimeline {
 	}
 }
 
-/** Changes a slot's {@link Slot#color} and {@link Slot#darkColor} for two color tinting. */
+/** Changes a slot's `Slot.color` and `Slot.darkColor` for two color tinting. */
 class TwoColorTimeline extends CurveTimeline {
 	public static inline final ENTRIES = 8;
 	public static inline final PREV_TIME = -8;
@@ -706,12 +706,11 @@ class TwoColorTimeline extends CurveTimeline {
 	public static inline final G2 = 6;
 	public static inline final B2 = 7;
 
-	/** The index of the slot in {@link Skeleton#slots()} that will be changed. The {@link Slot#darkColor()} must not be
-	 * null. */
+	/** The index of the slot in `Skeleton.slots` that will be changed. The `Slot.darkColor` must not be null. */
 	public var slotIndex:Int;
 
 	/** The time in seconds, red, green, blue, and alpha values of the color, red, green, blue of the dark color, for each key frame. */
-	public var frames:Array<Float>; // time, r, g, b, a, r2, g2, b2, ...
+	public final frames:Array<Float>; // time, r, g, b, a, r2, g2, b2, ...
 
 	public function new(frameCount:Int) {
 		super(frameCount);
@@ -805,16 +804,16 @@ class TwoColorTimeline extends CurveTimeline {
 	}
 }
 
-/** Changes a slot's {@link Slot#attachment}. */
+/** Changes a slot's `Slot.attachment`. */
 class AttachmentTimeline implements Timeline {
-	/** The index of the slot in {@link Skeleton#slots} that will be changed. */
+	/** The index of the slot in `Skeleton.slots` that will be changed. */
 	public var slotIndex:Int;
 
 	/** The time in seconds for each key frame. */
-	public var frames:Array<Float>; // time, ...
+	public final frames:Array<Float>; // time, ...
 
 	/** The attachment name for each key frame. May contain null values to clear the attachment. */
-	public var attachmentNames:Array<String>;
+	public final attachmentNames:Array<Null<String>>;
 
 	public function new(frameCount:Int) {
 		this.frames = Utils.newFloatArray(frameCount);
@@ -866,21 +865,21 @@ class AttachmentTimeline implements Timeline {
 	}
 }
 
-/** Changes a slot's {@link Slot#deform} to deform a {@link VertexAttachment}. */
+/** Changes a slot's `Slot.deform` to deform a `VertexAttachment`. */
 class DeformTimeline extends CurveTimeline {
 	static var zeros:Array<Float>;
 
-	/** The index of the slot in {@link Skeleton#getSlots()} that will be changed. */
+	/** The index of the slot in `Skeleton.slots` that will be changed. */
 	public var slotIndex:Int;
 
 	/** The attachment that will be deformed. */
 	public var attachment:VertexAttachment;
 
 	/** The time in seconds for each key frame. */
-	public var frames:Array<Float>; // time, ...
+	public final frames:Array<Float>; // time, ...
 
 	/** The vertices for each key frame. */
-	public var frameVertices:Array<Array<Float>>;
+	public final frameVertices:Array<Array<Float>>;
 
 	public function new(frameCount:Int) {
 		super(frameCount);
@@ -895,7 +894,7 @@ class DeformTimeline extends CurveTimeline {
 	}
 
 	/** Sets the time in seconds and the vertices for the specified key frame.
-	 * @param vertices Vertex positions for an unweighted VertexAttachment, or deform offsets if it has weights. */
+	 * @param vertices Vertex positions for an unweighted `VertexAttachment`, or deform offsets if it has weights. */
 	public function setFrame(frameIndex:Int, time:Float, vertices:Array<Float>) {
 		this.frames[frameIndex] = time;
 		this.frameVertices[frameIndex] = vertices;
@@ -1080,13 +1079,13 @@ class DeformTimeline extends CurveTimeline {
 	}
 }
 
-/** Fires an {@link Event} when specific animation times are reached. */
+/** Fires an `Event` when specific animation times are reached. */
 class EventTimeline implements Timeline {
 	/** The time in seconds for each key frame. */
-	public var frames:Array<Float>; // time, ...
+	public final frames:Array<Float>; // time, ...
 
 	/** The event for each key frame. */
-	public var events:Array<Event>;
+	public final events:Array<Event>;
 
 	public function new(frameCount:Int) {
 		this.frames = Utils.newFloatArray(frameCount);
@@ -1140,13 +1139,13 @@ class EventTimeline implements Timeline {
 	}
 }
 
-/** Changes a skeleton's {@link Skeleton#drawOrder}. */
+/** Changes a skeleton's `Skeleton.drawOrder`. */
 class DrawOrderTimeline implements Timeline {
 	/** The time in seconds for each key frame. */
-	public var frames:Array<Float>; // time, ...
+	public final frames:Array<Float>; // time, ...
 
-	/** The draw order for each key frame. See {@link #setFrame(int, float, int[])}. */
-	public var drawOrders:Array<Array<Int>>;
+	/** The draw order for each key frame. See `setFrame`. */
+	public final drawOrders:Array<Null<Array<Int>>>;
 
 	public function new(frameCount:Int) {
 		this.frames = Utils.newFloatArray(frameCount);
@@ -1163,9 +1162,9 @@ class DrawOrderTimeline implements Timeline {
 	}
 
 	/** Sets the time in seconds and the draw order for the specified key frame.
-	 * @param drawOrder For each slot in {@link Skeleton#slots}, the index of the new draw order. May be null to use setup pose
+	 * @param drawOrder For each slot in `Skeleton.slots`, the index of the new draw order. May be `null` to use setup pose
 	 *           draw order. */
-	public function setFrame(frameIndex:Int, time:Float, drawOrder:Array<Int>) {
+	public function setFrame(frameIndex:Int, time:Float, drawOrder:Null<Array<Int>>) {
 		this.frames[frameIndex] = time;
 		this.drawOrders[frameIndex] = drawOrder;
 	}
@@ -1201,8 +1200,8 @@ class DrawOrderTimeline implements Timeline {
 	}
 }
 
-/** Changes an IK constraint's {@link IkConstraint#mix}, {@link IkConstraint#softness},
- * {@link IkConstraint#bendDirection}, {@link IkConstraint#stretch}, and {@link IkConstraint#compress}. */
+/** Changes an IK constraint's `IkConstraint.mix`, `IkConstraint.softness`,
+ * `IkConstraint.bendDirection`, `IkConstraint.stretch`, and `IkConstraint.compress`. */
 class IkConstraintTimeline extends CurveTimeline {
 	public static inline final ENTRIES = 6;
 	public static inline final PREV_TIME = -6;
@@ -1217,11 +1216,11 @@ class IkConstraintTimeline extends CurveTimeline {
 	public static inline final COMPRESS = 4;
 	public static inline final STRETCH = 5;
 
-	/** The index of the IK constraint slot in {@link Skeleton#ikConstraints} that will be changed. */
+	/** The index of the IK constraint slot in `Skeleton.ikConstraints` that will be changed. */
 	public var ikConstraintIndex:Int;
 
 	/** The time in seconds, mix, softness, bend direction, compress, and stretch for each key frame. */
-	public var frames:Array<Float>; // time, mix, softness, bendDirection, compress, stretch, ...
+	public final frames:Array<Float>; // time, mix, softness, bendDirection, compress, stretch, ...
 
 	public function new(frameCount:Int) {
 		super(frameCount);
@@ -1326,8 +1325,8 @@ class IkConstraintTimeline extends CurveTimeline {
 	}
 }
 
-/** Changes a transform constraint's {@link TransformConstraint#rotateMix}, {@link TransformConstraint#translateMix},
- * {@link TransformConstraint#scaleMix}, and {@link TransformConstraint#shearMix}. */
+/** Changes a transform constraint's `TransformConstraint.rotateMix`, `TransformConstraint.translateMix`,
+ * `TransformConstraint.scaleMix`, and `TransformConstraint.shearMix`. */
 class TransformConstraintTimeline extends CurveTimeline {
 	public static inline final ENTRIES = 5;
 	public static inline final PREV_TIME = -5;
@@ -1340,11 +1339,11 @@ class TransformConstraintTimeline extends CurveTimeline {
 	public static inline final SCALE = 3;
 	public static inline final SHEAR = 4;
 
-	/** The index of the transform constraint slot in {@link Skeleton#transformConstraints} that will be changed. */
+	/** The index of the transform constraint slot in `Skeleton.transformConstraints` that will be changed. */
 	public var transformConstraintIndex:Int;
 
 	/** The time in seconds, rotate mix, translate mix, scale mix, and shear mix for each key frame. */
-	public var frames:Array<Float>; // time, rotate mix, translate mix, scale mix, shear mix, ...
+	public final frames:Array<Float>; // time, rotate mix, translate mix, scale mix, shear mix, ...
 
 	public function new(frameCount:Int) {
 		super(frameCount);
@@ -1427,18 +1426,18 @@ class TransformConstraintTimeline extends CurveTimeline {
 	}
 }
 
-/** Changes a path constraint's {@link PathConstraint#position}. */
+/** Changes a path constraint's `PathConstraint.position`. */
 class PathConstraintPositionTimeline extends CurveTimeline {
 	public static inline final ENTRIES = 2;
 	public static inline final PREV_TIME = -2;
 	public static inline final PREV_VALUE = -1;
 	public static inline final VALUE = 1;
 
-	/** The index of the path constraint slot in {@link Skeleton#pathConstraints} that will be changed. */
+	/** The index of the path constraint slot in `Skeleton.pathConstraints` that will be changed. */
 	public var pathConstraintIndex:Int;
 
 	/** The time in seconds and path constraint position for each key frame. */
-	public var frames:Array<Float>; // time, position, ...
+	public final frames:Array<Float>; // time, position, ...
 
 	public function new(frameCount:Int) {
 		super(frameCount);
@@ -1492,7 +1491,7 @@ class PathConstraintPositionTimeline extends CurveTimeline {
 	}
 }
 
-/** Changes a path constraint's {@link PathConstraint#spacing}. */
+/** Changes a path constraint's `PathConstraint.spacing`. */
 class PathConstraintSpacingTimeline extends PathConstraintPositionTimeline {
 	public function new(frameCount:Int) {
 		super(frameCount);
@@ -1539,8 +1538,8 @@ class PathConstraintSpacingTimeline extends PathConstraintPositionTimeline {
 	}
 }
 
-/** Changes a transform constraint's {@link PathConstraint#rotateMix} and
- * {@link TransformConstraint#translateMix}. */
+/** Changes a transform constraint's `PathConstraint.rotateMix` and
+ * `TransformConstraint.translateMix`. */
 class PathConstraintMixTimeline extends CurveTimeline {
 	public static inline final ENTRIES = 3;
 	public static inline final PREV_TIME = -3;
@@ -1549,11 +1548,11 @@ class PathConstraintMixTimeline extends CurveTimeline {
 	public static inline final ROTATE = 1;
 	public static inline final TRANSLATE = 2;
 
-	/** The index of the path constraint slot in {@link Skeleton#getPathConstraints()} that will be changed. */
+	/** The index of the path constraint slot in `Skeleton.pathConstraints` that will be changed. */
 	public var pathConstraintIndex:Int;
 
 	/** The time in seconds, rotate mix, and translate mix for each key frame. */
-	public var frames:Array<Float>; // time, rotate mix, translate mix, ...
+	public final frames:Array<Float>; // time, rotate mix, translate mix, ...
 
 	public function new(frameCount:Int) {
 		super(frameCount);
