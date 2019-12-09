@@ -1048,121 +1048,6 @@ class TrackEntry {
 	}
 }
 
-class EventQueue {
-	public var objects:Array<Dynamic> = [];
-	public var drainDisabled = false;
-	public var animState:AnimationState;
-
-	public function new(animState:AnimationState) {
-		this.animState = animState;
-	}
-
-	public function start(entry:TrackEntry) {
-		this.objects.push(EventType.start);
-		this.objects.push(entry);
-		this.animState.animationsChanged = true;
-	}
-
-	public function interrupt(entry:TrackEntry) {
-		this.objects.push(EventType.interrupt);
-		this.objects.push(entry);
-	}
-
-	public function end(entry:TrackEntry) {
-		this.objects.push(EventType.end);
-		this.objects.push(entry);
-		this.animState.animationsChanged = true;
-	}
-
-	public function dispose(entry:TrackEntry) {
-		this.objects.push(EventType.dispose);
-		this.objects.push(entry);
-	}
-
-	public function complete(entry:TrackEntry) {
-		this.objects.push(EventType.complete);
-		this.objects.push(entry);
-	}
-
-	public function event(entry:TrackEntry, event:Event) {
-		this.objects.push(EventType.event);
-		this.objects.push(entry);
-		this.objects.push(event);
-	}
-
-	public function drain() {
-		if (this.drainDisabled)
-			return;
-		this.drainDisabled = true;
-
-		var objects = this.objects;
-		var listeners = this.animState.listeners;
-
-		var i = 0;
-		while (i < objects.length) {
-			var type:EventType = objects[i];
-			var entry:TrackEntry = objects[i + 1];
-			switch (type) {
-				case EventType.start:
-					if (entry.listener != null)
-						entry.listener.start(entry);
-					for (listener in listeners)
-						listener.start(entry);
-				case EventType.interrupt:
-					if (entry.listener != null)
-						entry.listener.interrupt(entry);
-					for (listener in listeners)
-						listener.interrupt(entry);
-				case EventType.end:
-					if (entry.listener != null)
-						entry.listener.end(entry);
-					for (listener in listeners)
-						listener.end(entry);
-					// Fall through.
-					if (entry.listener != null)
-						entry.listener.dispose(entry);
-					for (listener in listeners)
-						listener.dispose(entry);
-					this.animState.trackEntryPool.free(entry);
-				case EventType.dispose:
-					if (entry.listener != null)
-						entry.listener.dispose(entry);
-					for (listener in listeners)
-						listener.dispose(entry);
-					this.animState.trackEntryPool.free(entry);
-				case EventType.complete:
-					if (entry.listener != null)
-						entry.listener.complete(entry);
-					for (listener in listeners)
-						listener.complete(entry);
-				case EventType.event:
-					var event:Event = objects[i++ + 2];
-					if (entry.listener != null)
-						entry.listener.event(entry, event);
-					for (listener in listeners)
-						listener.event(entry, event);
-			}
-			i += 2;
-		}
-		this.clear();
-
-		this.drainDisabled = false;
-	}
-
-	public function clear() {
-		this.objects.resize(0);
-	}
-}
-
-enum abstract EventType(Int) {
-	var start;
-	var interrupt;
-	var end;
-	var dispose;
-	var complete;
-	var event;
-}
-
 /** The interface to implement for receiving `TrackEntry` events. It is always safe to call `AnimationState` methods when receiving
  * events.
  *
@@ -1187,4 +1072,119 @@ interface AnimationStateListener {
 
 	/** Invoked when this entry's animation triggers an event. */
 	function event(entry:TrackEntry, event:Event):Void;
+}
+
+private class EventQueue {
+	public final animState:AnimationState;
+	public final objects:Array<Dynamic> = [];
+	public var drainDisabled = false;
+
+	public function new(animState:AnimationState) {
+		this.animState = animState;
+	}
+
+	public function start(entry:TrackEntry) {
+		objects.push(EventType.start);
+		objects.push(entry);
+		animState.animationsChanged = true;
+	}
+
+	public function interrupt(entry:TrackEntry) {
+		objects.push(EventType.interrupt);
+		objects.push(entry);
+	}
+
+	public function end(entry:TrackEntry) {
+		objects.push(EventType.end);
+		objects.push(entry);
+		animState.animationsChanged = true;
+	}
+
+	public function dispose(entry:TrackEntry) {
+		objects.push(EventType.dispose);
+		objects.push(entry);
+	}
+
+	public function complete(entry:TrackEntry) {
+		objects.push(EventType.complete);
+		objects.push(entry);
+	}
+
+	public function event(entry:TrackEntry, event:Event) {
+		objects.push(EventType.event);
+		objects.push(entry);
+		objects.push(event);
+	}
+
+	public function drain() {
+		if (drainDisabled)
+			return;
+		drainDisabled = true;
+
+		var objects = this.objects;
+		var listeners = animState.listeners;
+
+		var i = 0;
+		while (i < objects.length) {
+			var type:EventType = objects[i];
+			var entry:TrackEntry = objects[i + 1];
+			switch (type) {
+				case start:
+					if (entry.listener != null)
+						entry.listener.start(entry);
+					for (listener in listeners)
+						listener.start(entry);
+				case interrupt:
+					if (entry.listener != null)
+						entry.listener.interrupt(entry);
+					for (listener in listeners)
+						listener.interrupt(entry);
+				case end:
+					if (entry.listener != null)
+						entry.listener.end(entry);
+					for (listener in listeners)
+						listener.end(entry);
+					// Fall through.
+					if (entry.listener != null)
+						entry.listener.dispose(entry);
+					for (listener in listeners)
+						listener.dispose(entry);
+					animState.trackEntryPool.free(entry);
+				case dispose:
+					if (entry.listener != null)
+						entry.listener.dispose(entry);
+					for (listener in listeners)
+						listener.dispose(entry);
+					animState.trackEntryPool.free(entry);
+				case complete:
+					if (entry.listener != null)
+						entry.listener.complete(entry);
+					for (listener in listeners)
+						listener.complete(entry);
+				case event:
+					var event:Event = objects[i++ + 2];
+					if (entry.listener != null)
+						entry.listener.event(entry, event);
+					for (listener in listeners)
+						listener.event(entry, event);
+			}
+			i += 2;
+		}
+		clear();
+
+		drainDisabled = false;
+	}
+
+	public inline function clear() {
+		objects.resize(0);
+	}
+}
+
+private enum abstract EventType(Int) {
+	var start;
+	var interrupt;
+	var end;
+	var dispose;
+	var complete;
+	var event;
 }
