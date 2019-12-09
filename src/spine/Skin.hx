@@ -18,7 +18,7 @@ class SkinEntry {
 
 /** Stores attachments by slot index and attachment name.
  *
- * See SkeletonData {@link SkeletonData#defaultSkin}, Skeleton {@link Skeleton#skin}, and
+ * See `SkeletonData.defaultSkin`, `Skeleton.skin`, and
  * [Runtime skins](http://esotericsoftware.com/spine-runtime-skins) in the Spine Runtimes Guide. */
 class Skin {
 	/** The skin's name, which is unique across all skins in the skeleton. */
@@ -164,7 +164,8 @@ class Skin {
 	}
 
 	/** Attach each attachment in this skin if the corresponding attachment in the old skin is currently attached. */
-	public function attachAll(skeleton:Skeleton, oldSkin:Skin) {
+	@:allow(spine.Skeleton)
+	function attachAll(skeleton:Skeleton, oldSkin:Skin) {
 		var slotIndex = 0;
 		for (slot in skeleton.slots) {
 			var slotAttachment = slot.getAttachment();
