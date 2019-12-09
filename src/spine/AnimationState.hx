@@ -1163,11 +1163,10 @@ enum abstract EventType(Int) {
 	var event;
 }
 
-/** The interface to implement for receiving TrackEntry events. It is always safe to call AnimationState methods when receiving
+/** The interface to implement for receiving `TrackEntry` events. It is always safe to call `AnimationState` methods when receiving
  * events.
  *
- * See TrackEntry {@link TrackEntry#listener} and AnimationState
- * {@link AnimationState#addListener()}. */
+ * See `TrackEntry.listener` and `AnimationState.addListener`. */
 interface AnimationStateListener {
 	/** Invoked when this entry has been set as the current entry. */
 	function start(entry:TrackEntry):Void;
@@ -1180,7 +1179,7 @@ interface AnimationStateListener {
 	function end(entry:TrackEntry):Void;
 
 	/** Invoked when this entry will be disposed. This may occur without the entry ever being set as the current entry.
-	 * References to the entry should not be kept after dispose is called, as it may be destroyed or reused. */
+	 * References to the entry should not be kept after `dispose` is called, as it may be destroyed or reused. */
 	function dispose(entry:TrackEntry):Void;
 
 	/** Invoked every time this entry's animation completes a loop. */
@@ -1188,18 +1187,4 @@ interface AnimationStateListener {
 
 	/** Invoked when this entry's animation triggers an event. */
 	function event(entry:TrackEntry, event:Event):Void;
-}
-
-class AnimationStateAdapter implements AnimationStateListener {
-	public function start(entry:TrackEntry) {}
-
-	public function interrupt(entry:TrackEntry) {}
-
-	public function end(entry:TrackEntry) {}
-
-	public function dispose(entry:TrackEntry) {}
-
-	public function complete(entry:TrackEntry) {}
-
-	public function event(entry:TrackEntry, event:Event) {}
 }
