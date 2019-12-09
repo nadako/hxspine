@@ -1,7 +1,6 @@
 package spine;
 
 import haxe.DynamicAccess;
-import spine.utils.Color;
 import haxe.extern.EitherType;
 import spine.Animation;
 import spine.BoneData.TransformMode;
@@ -10,6 +9,7 @@ import spine.attachments.VertexAttachment;
 import spine.attachments.Attachment;
 import spine.attachments.AttachmentLoader;
 import spine.attachments.MeshAttachment;
+import spine.utils.Color;
 import spine.utils.Utils;
 
 private typedef JRoot = {
@@ -150,7 +150,7 @@ private typedef JAttachmentMesh = JAttachmentWithVertices & {
 	var height:Float;
 }
 
-typedef JVertices = Array<Float>;
+private typedef JVertices = Array<Float>;
 
 private typedef JAttachmentBoundingBox = JAttachmentWithVertices & {
 	var vertexCount:Int;
@@ -301,20 +301,20 @@ private typedef JEventKeyframe = JKeyframe & {
  * [JSON and binary data](http://esotericsoftware.com/spine-loading-skeleton-data#JSON-and-binary-data) in the Spine
  * Runtimes Guide. */
 class SkeletonJson {
-	public var attachmentLoader:AttachmentLoader;
-
 	/** Scales bone positions, image sizes, and translations as they are loaded. This allows different size images to be used at
 	 * runtime than were used in Spine.
 	 *
 	 * See [Scaling](http://esotericsoftware.com/spine-loading-skeleton-data#Scaling) in the Spine Runtimes Guide. */
 	public var scale = 1.0;
 
-	var linkedMeshes = new Array<LinkedMesh>();
+	final attachmentLoader:AttachmentLoader;
+	final linkedMeshes = new Array<LinkedMesh>();
 
 	public function new(attachmentLoader:AttachmentLoader) {
 		this.attachmentLoader = attachmentLoader;
 	}
 
+	/** Deserializes the Spine JSON data into a SkeletonData object. */
 	public function readSkeletonData(json:EitherType<String, JRoot>):SkeletonData {
 		var scale = this.scale;
 		var skeletonData = new SkeletonData();
@@ -586,7 +586,7 @@ class SkeletonJson {
 		return skeletonData;
 	}
 
-	public function readAttachment(map:JAttachment, skin:Skin, slotIndex:Int, name:String, skeletonData:SkeletonData):Attachment {
+	function readAttachment(map:JAttachment, skin:Skin, slotIndex:Int, name:String, skeletonData:SkeletonData):Attachment {
 		var scale = this.scale;
 		name = this.getValue(map, "name", name);
 
@@ -724,7 +724,7 @@ class SkeletonJson {
 		return null;
 	}
 
-	public function readVertices(map:JAttachmentWithVertices, attachment:VertexAttachment, verticesLength:Int) {
+	function readVertices(map:JAttachmentWithVertices, attachment:VertexAttachment, verticesLength:Int) {
 		var scale = this.scale;
 		attachment.worldVerticesLength = verticesLength;
 		var vertices = map.vertices;
@@ -757,7 +757,7 @@ class SkeletonJson {
 		attachment.vertices = Utils.toFloatArray(weights);
 	}
 
-	public function readAnimation(map:JAnimation, name:String, skeletonData:SkeletonData) {
+	function readAnimation(map:JAnimation, name:String, skeletonData:SkeletonData) {
 		var scale = this.scale;
 		var timelines = new Array<Timeline>();
 		var duration = 0.0;
@@ -1076,7 +1076,7 @@ class SkeletonJson {
 		skeletonData.animations.push(new Animation(name, timelines, duration));
 	}
 
-	public function readCurve(map:JKeyframeWithCurve, timeline:CurveTimeline, frameIndex:Int) {
+	function readCurve(map:JKeyframeWithCurve, timeline:CurveTimeline, frameIndex:Int) {
 		if (map.curve == null)
 			return;
 		if (map.curve == "stepped")
@@ -1087,11 +1087,11 @@ class SkeletonJson {
 		}
 	}
 
-	public function getValue<T>(map:Dynamic, prop:String, defaultValue:T):T {
+	function getValue<T>(map:Dynamic, prop:String, defaultValue:T):T {
 		return Reflect.hasField(map, prop) ? Reflect.field(map, prop) : defaultValue;
 	}
 
-	public static function blendModeFromString(str:String) {
+	static function blendModeFromString(str:String) {
 		str = str.toLowerCase();
 		if (str == "normal")
 			return BlendMode.Normal;
@@ -1104,7 +1104,7 @@ class SkeletonJson {
 		throw new Error('Unknown blend mode: ${str}');
 	}
 
-	public static function positionModeFromString(str:String) {
+	static function positionModeFromString(str:String) {
 		str = str.toLowerCase();
 		if (str == "fixed")
 			return PositionMode.Fixed;
@@ -1113,7 +1113,7 @@ class SkeletonJson {
 		throw new Error('Unknown position mode: ${str}');
 	}
 
-	public static function spacingModeFromString(str:String) {
+	static function spacingModeFromString(str:String) {
 		str = str.toLowerCase();
 		if (str == "length")
 			return SpacingMode.Length;
@@ -1124,7 +1124,7 @@ class SkeletonJson {
 		throw new Error('Unknown position mode: ${str}');
 	}
 
-	public static function rotateModeFromString(str:String) {
+	static function rotateModeFromString(str:String) {
 		str = str.toLowerCase();
 		if (str == "tangent")
 			return RotateMode.Tangent;
@@ -1135,7 +1135,7 @@ class SkeletonJson {
 		throw new Error('Unknown rotate mode: ${str}');
 	}
 
-	public static function transformModeFromString(str:String) {
+	static function transformModeFromString(str:String) {
 		str = str.toLowerCase();
 		if (str == "normal")
 			return TransformMode.Normal;

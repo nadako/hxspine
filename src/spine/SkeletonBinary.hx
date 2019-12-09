@@ -45,6 +45,7 @@ class SkeletonBinary {
 		this.attachmentLoader = attachmentLoader;
 	}
 
+	/** Deserializes the Spine binary data into a SkeletonData object. */
 	public function readSkeletonData(binary:Bytes):SkeletonData {
 		var scale = this.scale;
 
