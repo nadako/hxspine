@@ -10,7 +10,7 @@ class Pool<T> {
 		this.reset = reset;
 	}
 
-	public function obtain() {
+	public function obtain():T {
 		return items.length > 0 ? items.pop() : instantiator();
 	}
 

@@ -12,18 +12,18 @@ import spine.utils.IntSet;
  * See [Applying Animations](http://esotericsoftware.com/spine-applying-animations/) in the Spine Runtimes Guide. */
 @:access(spine.TrackEntry)
 class AnimationState {
-	public static final emptyAnimation = new Animation("<empty>", [], 0);
+	static final emptyAnimation = new Animation("<empty>", [], 0);
 
 	/** 1. A previously applied timeline has set this property.
 	 *
-	 	 	 * Result: Mix from the current pose to the timeline pose. */
-	public static inline final SUBSEQUENT = 0;
+	 * Result: Mix from the current pose to the timeline pose. */
+	static inline final SUBSEQUENT = 0;
 
 	/** 1. This is the first timeline to set this property.
 	 * 2. The next track entry applied after this one does not have a timeline to set this property.
 	 *
 	 * Result: Mix from the setup pose to the timeline pose. */
-	public static inline final FIRST = 1;
+	static inline final FIRST = 1;
 
 	/** 1. This is the first timeline to set this property.
 	 * 2. The next track entry to be applied does have a timeline to set this property.
@@ -31,7 +31,7 @@ class AnimationState {
 	 *
 	 * Result: Mix from the setup pose to the timeline pose, but do not mix out. This avoids "dipping" when crossfading animations
 	 * that key the same property. A subsequent timeline will set this property using a mix. */
-	public static inline final HOLD = 2;
+	static inline final HOLD = 2;
 
 	/** 1. This is the first timeline to set this property.
 	 * 2. The next track entry to be applied does have a timeline to set this property.
@@ -45,7 +45,7 @@ class AnimationState {
 	 * "dipping" A is not mixed out, however D (the first entry that doesn't set the property) mixing in is used to mix out A
 	 * (which affects B and C). Without using D to mix out, A would be applied fully until mixing completes, then snap into
 	 * place. */
-	public static inline final HOLD_MIX = 3;
+	static inline final HOLD_MIX = 3;
 
 	/** 1. An attachment timeline in a subsequent track entry sets the attachment for the same slot as this attachment
 	 * timeline.
@@ -53,34 +53,33 @@ class AnimationState {
 	 * Result: This attachment timeline will not use MixDirection.out, which would otherwise show the setup mode attachment (or
 	 * none if not visible in setup mode). This allows deform timelines to be applied for the subsequent entry to mix from, rather
 	 * than mixing from the setup pose. */
-	public static inline final NOT_LAST = 4;
+	static inline final NOT_LAST = 4;
 
 	/** The AnimationStateData to look up mix durations. */
 	public var data:AnimationStateData;
 
 	/** The list of tracks that currently have animations, which may contain null entries. */
-	public var tracks = new Array<TrackEntry>();
+	public final tracks = new Array<Null<TrackEntry>>();
 
 	/** Multiplier for the delta time when the animation state is updated, causing time for all animations and mixes to play slower
 	 * or faster. Defaults to 1.
 	 *
-	 * See TrackEntry {@link TrackEntry#timeScale} for affecting a single animation. */
+	 * See TrackEntry `TrackEntry.timeScale` for affecting a single animation. */
 	public var timeScale = 1.0;
 
-	public var events = new Array<Event>();
-	public var listeners = new Array<AnimationStateListener>();
-	public var queue:EventQueue;
-	public var propertyIDs = new IntSet();
-	public var animationsChanged = false;
-
-	public var trackEntryPool = new Pool(TrackEntry.new, e -> e.reset());
+	final events = new Array<Event>();
+	final listeners = new Array<AnimationStateListener>();
+	final queue:EventQueue;
+	final propertyIDs = new IntSet();
+	final trackEntryPool = new Pool(TrackEntry.new, e -> e.reset());
+	var animationsChanged = false;
 
 	public function new(data:AnimationStateData) {
 		this.data = data;
 		this.queue = new EventQueue(this);
 	}
 
-	/** Increments each track entry {@link TrackEntry#trackTime()}, setting queued animations as current if needed. */
+	/** Increments each track entry `TrackEntry.trackTime`, setting queued animations as current if needed. */
 	public function update(delta:Float) {
 		delta *= this.timeScale;
 		var tracks = this.tracks;
@@ -142,7 +141,7 @@ class AnimationState {
 	}
 
 	/** Returns true when all mixing from entries are complete. */
-	public function updateMixingFrom(to:TrackEntry, delta:Float):Bool {
+	function updateMixingFrom(to:TrackEntry, delta:Float):Bool {
 		var from = to.mixingFrom;
 		if (from == null)
 			return true;
@@ -240,7 +239,7 @@ class AnimationState {
 		return applied;
 	}
 
-	public function applyMixingFrom(to:TrackEntry, skeleton:Skeleton, blend:MixBlend) {
+	function applyMixingFrom(to:TrackEntry, skeleton:Skeleton, blend:MixBlend):Float {
 		var from = to.mixingFrom;
 		if (from.mixingFrom != null)
 			this.applyMixingFrom(from, skeleton, blend);
@@ -336,7 +335,7 @@ class AnimationState {
 		return mix;
 	}
 
-	public function applyRotateTimeline(timeline:Timeline, skeleton:Skeleton, time:Float, alpha:Float, blend:MixBlend, timelinesRotation:Array<Float>, i:Int,
+	function applyRotateTimeline(timeline:Timeline, skeleton:Skeleton, time:Float, alpha:Float, blend:MixBlend, timelinesRotation:Array<Float>, i:Int,
 			firstFrame:Bool) {
 		if (firstFrame)
 			timelinesRotation[i] = 0;
@@ -414,7 +413,7 @@ class AnimationState {
 		bone.rotation = r1 - (16384 - Std.int(16384.499999999996 - r1 / 360)) * 360;
 	}
 
-	public function queueEvents(entry:TrackEntry, animationTime:Float) {
+	function queueEvents(entry:TrackEntry, animationTime:Float) {
 		var animationStart = entry.animationStart,
 			animationEnd = entry.animationEnd;
 		var duration = animationEnd - animationStart;
@@ -456,7 +455,7 @@ class AnimationState {
 
 	/** Removes all animations from all tracks, leaving skeletons in their current pose.
 	 *
-	 * It may be desired to use {@link AnimationState#setEmptyAnimation()} to mix the skeletons back to the setup pose,
+	 * It may be desired to use `AnimationState.setEmptyAnimation` to mix the skeletons back to the setup pose,
 	 * rather than leaving them in their current pose. */
 	public function clearTracks() {
 		var oldDrainDisabled = this.queue.drainDisabled;
@@ -470,7 +469,7 @@ class AnimationState {
 
 	/** Removes all animations from the track, leaving skeletons in their current pose.
 	 *
-	 * It may be desired to use {@link AnimationState#setEmptyAnimation()} to mix the skeletons back to the setup pose,
+	 * It may be desired to use `AnimationState.setEmptyAnimation` to mix the skeletons back to the setup pose,
 	 * rather than leaving them in their current pose. */
 	public function clearTrack(trackIndex:Int) {
 		if (trackIndex >= this.tracks.length)
@@ -499,7 +498,7 @@ class AnimationState {
 		this.queue.drain();
 	}
 
-	public function setCurrent(index:Int, current:TrackEntry, interrupt:Bool) {
+	function setCurrent(index:Int, current:TrackEntry, interrupt:Bool) {
 		var from = this.expandToIndex(index);
 		this.tracks[index] = current;
 
@@ -522,8 +521,8 @@ class AnimationState {
 
 	/** Sets an animation by name.
 	 *
-	 * {@link #setAnimationWith(}. */
-	public function setAnimation(trackIndex:Int, animationName:String, loop:Bool) {
+	 * @see `setAnimationWith`. */
+	public function setAnimation(trackIndex:Int, animationName:String, loop:Bool):TrackEntry {
 		var animation = this.data.skeletonData.findAnimation(animationName);
 		if (animation == null)
 			throw new Error("Animation not found: " + animationName);
@@ -533,10 +532,10 @@ class AnimationState {
 	/** Sets the current animation for a track, discarding any queued animations. If the formerly current track entry was never
 	 * applied to a skeleton, it is replaced (not mixed from).
 	 * @param loop If true, the animation will repeat. If false it will not, instead its last frame is applied if played beyond its
-	 *           duration. In either case {@link TrackEntry#trackEnd} determines when the track is cleared.
+	 *           duration. In either case `TrackEntry.trackEnd` determines when the track is cleared.
 	 * @returns A track entry to allow further customization of animation playback. References to the track entry must not be kept
-	 *         after the {@link AnimationStateListener#dispose()} event occurs. */
-	public function setAnimationWith(trackIndex:Int, animation:Animation, loop:Bool) {
+	 *         after the `AnimationStateListener.dispose` event occurs. */
+	public function setAnimationWith(trackIndex:Int, animation:Animation, loop:Bool):TrackEntry {
 		if (animation == null)
 			throw new Error("animation cannot be null.");
 		var interrupt = true;
@@ -561,8 +560,8 @@ class AnimationState {
 
 	/** Queues an animation by name.
 	 *
-	 * See {@link #addAnimationWith()}. */
-	public function addAnimation(trackIndex:Int, animationName:String, loop:Bool, delay:Float) {
+	 * @see `addAnimationWith`. */
+	public function addAnimation(trackIndex:Int, animationName:String, loop:Bool, delay:Float):TrackEntry {
 		var animation = this.data.skeletonData.findAnimation(animationName);
 		if (animation == null)
 			throw new Error("Animation not found: " + animationName);
@@ -570,14 +569,14 @@ class AnimationState {
 	}
 
 	/** Adds an animation to be played after the current or last queued animation for a track. If the track is empty, it is
-	 * equivalent to calling {@link #setAnimationWith()}.
-	 * @param delay If > 0, sets {@link TrackEntry#delay}. If <= 0, the delay set is the duration of the previous track entry
-	 *           minus any mix duration (from the {@link AnimationStateData}) plus the specified `delay` (ie the mix
+	 * equivalent to calling `setAnimationWith`.
+	 * @param delay If > 0, sets `TrackEntry.delay`. If <= 0, the delay set is the duration of the previous track entry
+	 *           minus any mix duration (from the `AnimationStateData`) plus the specified `delay` (ie the mix
 	 *           ends at (`delay` = 0) or before (`delay` < 0) the previous track entry duration). If the
 	 *           previous entry is looping, its next loop completion is used instead of its duration.
 	 * @returns A track entry to allow further customization of animation playback. References to the track entry must not be kept
-	 *         after the {@link AnimationStateListener#dispose()} event occurs. */
-	public function addAnimationWith(trackIndex:Int, animation:Animation, loop:Bool, delay:Float) {
+	 *         after the `AnimationStateListener.dispose` event occurs. */
+	public function addAnimationWith(trackIndex:Int, animation:Animation, loop:Bool, delay:Float):TrackEntry {
 		if (animation == null)
 			throw new Error("animation cannot be null.");
 
@@ -612,20 +611,20 @@ class AnimationState {
 	}
 
 	/** Sets an empty animation for a track, discarding any queued animations, and sets the track entry's
-	 * {@link TrackEntry#mixduration}. An empty animation has no timelines and serves as a placeholder for mixing in or out.
+	 * `TrackEntry.mixduration`. An empty animation has no timelines and serves as a placeholder for mixing in or out.
 	 *
-	 * Mixing out is done by setting an empty animation with a mix duration using either {@link #setEmptyAnimation()},
-	 * {@link #setEmptyAnimations()}, or {@link #addEmptyAnimation()}. Mixing to an empty animation causes
+	 * Mixing out is done by setting an empty animation with a mix duration using either `setEmptyAnimation`,
+	 * `setEmptyAnimations`, or `addEmptyAnimation`. Mixing to an empty animation causes
 	 * the previous animation to be applied less and less over the mix duration. Properties keyed in the previous animation
 	 * transition to the value from lower tracks or to the setup pose value if no lower tracks key the property. A mix duration of
 	 * 0 still mixes out over one frame.
 	 *
 	 * Mixing in is done by first setting an empty animation, then adding an animation using
-	 * {@link #addAnimation()} and on the returned track entry, set the
-	 * {@link TrackEntry#setMixDuration()}. Mixing from an empty animation causes the new animation to be applied more and
+	 * `addAnimation` and on the returned track entry, set the
+	 * `TrackEntry.mixDuration`. Mixing from an empty animation causes the new animation to be applied more and
 	 * more over the mix duration. Properties keyed in the new animation transition from the value from lower tracks or from the
 	 * setup pose value if no lower tracks key the property to the value keyed in the new animation. */
-	public function setEmptyAnimation(trackIndex:Int, mixDuration:Float) {
+	public function setEmptyAnimation(trackIndex:Int, mixDuration:Float):TrackEntry {
 		var entry = this.setAnimationWith(trackIndex, AnimationState.emptyAnimation, false);
 		entry.mixDuration = mixDuration;
 		entry.trackEnd = mixDuration;
@@ -633,17 +632,16 @@ class AnimationState {
 	}
 
 	/** Adds an empty animation to be played after the current or last queued animation for a track, and sets the track entry's
-	 * {@link TrackEntry#mixDuration}. If the track is empty, it is equivalent to calling
-	 * {@link #setEmptyAnimation()}.
+	 * `TrackEntry.mixDuration`. If the track is empty, it is equivalent to calling `setEmptyAnimation`.
 	 *
-	 * See {@link #setEmptyAnimation()}.
-	 * @param delay If > 0, sets {@link TrackEntry#delay}. If <= 0, the delay set is the duration of the previous track entry
+	 * @see `setEmptyAnimation`.
+	 * @param delay If > 0, sets `TrackEntry.delay`. If <= 0, the delay set is the duration of the previous track entry
 	 *           minus any mix duration plus the specified `delay` (ie the mix ends at (`delay` = 0) or
 	 *           before (`delay` < 0) the previous track entry duration). If the previous entry is looping, its next
 	 *           loop completion is used instead of its duration.
 	 * @return A track entry to allow further customization of animation playback. References to the track entry must not be kept
-	 *         after the {@link AnimationStateListener#dispose()} event occurs. */
-	public function addEmptyAnimation(trackIndex:Int, mixDuration:Float, delay:Float) {
+	 *         after the `AnimationStateListener.dispose` event occurs. */
+	public function addEmptyAnimation(trackIndex:Int, mixDuration:Float, delay:Float):TrackEntry {
 		if (delay <= 0)
 			delay -= mixDuration;
 		var entry = this.addAnimationWith(trackIndex, AnimationState.emptyAnimation, false, delay);
@@ -665,16 +663,16 @@ class AnimationState {
 		this.queue.drain();
 	}
 
-	public function expandToIndex(index:Int) {
-		if (index < this.tracks.length)
-			return this.tracks[index];
-		Utils.ensureArrayCapacity(this.tracks, index + 1, null);
-		this.tracks.resize(index + 1);
+	function expandToIndex(index:Int):Null<TrackEntry> {
+		if (index < tracks.length)
+			return tracks[index];
+		Utils.ensureArrayCapacity(tracks, index + 1, null);
+		tracks.resize(index + 1);
 		return null;
 	}
 
-	public function trackEntry(trackIndex:Int, animation:Animation, loop:Bool, last:Null<TrackEntry>) {
-		var entry = this.trackEntryPool.obtain();
+	function trackEntry(trackIndex:Int, animation:Animation, loop:Bool, last:Null<TrackEntry>):TrackEntry {
+		var entry = trackEntryPool.obtain();
 		entry.trackIndex = trackIndex;
 		entry.animation = animation;
 		entry.loop = loop;
@@ -704,7 +702,7 @@ class AnimationState {
 		return entry;
 	}
 
-	public function disposeNext(entry:TrackEntry) {
+	function disposeNext(entry:TrackEntry) {
 		var next = entry.next;
 		while (next != null) {
 			this.queue.dispose(next);
@@ -713,7 +711,7 @@ class AnimationState {
 		entry.next = null;
 	}
 
-	public function _animationsChanged() {
+	function _animationsChanged() {
 		this.animationsChanged = false;
 
 		this.propertyIDs.clear();
@@ -742,7 +740,7 @@ class AnimationState {
 		}
 	}
 
-	public function computeHold(entry:TrackEntry) {
+	function computeHold(entry:TrackEntry) {
 		var to = entry.mixingTo;
 		var timelines = entry.animation.timelines;
 		var timelinesCount = entry.animation.timelines.length;
@@ -792,7 +790,7 @@ class AnimationState {
 		}
 	}
 
-	public function computeNotLast(entry:TrackEntry) {
+	function computeNotLast(entry:TrackEntry) {
 		var timelines = entry.animation.timelines;
 		var timelinesCount = entry.animation.timelines.length;
 		var timelineMode = entry.timelineMode;
@@ -808,7 +806,7 @@ class AnimationState {
 	}
 
 	/** Returns the track entry for the animation currently playing on the track, or null if no animation is currently playing. */
-	public function getCurrent(trackIndex:Int) {
+	public function getCurrent(trackIndex:Int):Null<TrackEntry> {
 		if (trackIndex >= this.tracks.length)
 			return null;
 		return this.tracks[trackIndex];
@@ -818,23 +816,21 @@ class AnimationState {
 	public function addListener(listener:AnimationStateListener) {
 		if (listener == null)
 			throw new Error("listener cannot be null.");
-		this.listeners.push(listener);
+		listeners.push(listener);
 	}
 
-	/** Removes the listener added with {@link #addListener()}. */
+	/** Removes the listener added with `addListener`. */
 	public function removeListener(listener:AnimationStateListener) {
-		var index = this.listeners.indexOf(listener);
-		if (index >= 0)
-			this.listeners.splice(index, 1);
+		listeners.remove(listener);
 	}
 
-	/** Removes all listeners added with {@link #addListener()}. */
+	/** Removes all listeners added with `addListener`. */
 	public function clearListeners() {
 		this.listeners.resize(0);
 	}
 
 	/** Discards all listener notifications that have not yet been delivered. This can be useful to call from an
-	 * {@link AnimationStateListener} when it is known that further notifications that may have been already queued for delivery
+	 * `AnimationStateListener` when it is known that further notifications that may have been already queued for delivery
 	 * are not wanted because new animations are being set. */
 	public function clearListenerNotifications() {
 		this.queue.clear();
@@ -995,9 +991,9 @@ class TrackEntry {
 	final timelineHoldMix = new Array<TrackEntry>();
 	final timelinesRotation = new Array<Float>();
 
-	public function new() {}
+	function new() {}
 
-	public function reset() {
+	function reset() {
 		this.next = null;
 		this.mixingFrom = null;
 		this.mixingTo = null;
@@ -1066,6 +1062,7 @@ interface AnimationStateListener {
 	function event(entry:TrackEntry, event:Event):Void;
 }
 
+@:access(spine.AnimationState)
 private class EventQueue {
 	public final animState:AnimationState;
 	public final objects:Array<Dynamic> = [];
