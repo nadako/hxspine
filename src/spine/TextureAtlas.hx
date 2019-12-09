@@ -1,12 +1,13 @@
 package spine;
 
 import spine.Texture;
-import spine.utils.Disposable;
 
 using StringTools;
 
-class TextureAtlas implements Disposable {
+class TextureAtlas {
+	/** An atlas page for each texture. */
 	public var pages = new Array<TextureAtlasPage>();
+	/** The atlas regions across all pages. */
 	public var regions = new Array<TextureAtlasRegion>();
 
 	public function new(atlasText:String, textureLoader:(path:String) -> Texture) {
@@ -118,7 +119,9 @@ class TextureAtlas implements Disposable {
 		}
 	}
 
-	public function findRegion(name:String):TextureAtlasRegion {
+	/** Returns the first region found with the specified name, or null if it was not found.
+	 * String comparison is used to find the region so the result should be cached rather than calling this method multiple times. */
+	public function findRegion(name:String):Null<TextureAtlasRegion> {
 		for (region in regions) {
 			if (region.name == name) {
 				return region;
@@ -127,6 +130,7 @@ class TextureAtlas implements Disposable {
 		return null;
 	}
 
+	/** Disposes texture of each AtlasPage. */
 	public function dispose() {
 		for (page in pages) {
 			page.texture.dispose();
@@ -134,7 +138,7 @@ class TextureAtlas implements Disposable {
 	}
 }
 
-class TextureAtlasReader {
+private class TextureAtlasReader {
 	public var lines:Array<String>;
 	public var index:Int = 0;
 

@@ -8,12 +8,12 @@ import spine.attachments.MeshAttachment;
 import spine.attachments.RegionAttachment;
 import spine.attachments.AttachmentLoader;
 
-/** An {@link AttachmentLoader} that configures attachments using texture regions from an {@link TextureAtlas}.
+/** An `AttachmentLoader` that configures attachments using texture regions from an `TextureAtlas`.
  *
  * See [Loading skeleton data](http://esotericsoftware.com/spine-loading-skeleton-data#JSON-and-binary-data) in the
  * Spine Runtimes Guide. */
 class AtlasAttachmentLoader implements AttachmentLoader {
-	public var atlas:TextureAtlas;
+	final atlas:TextureAtlas;
 
 	public function new(atlas:TextureAtlas) {
 		this.atlas = atlas;
