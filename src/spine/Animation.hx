@@ -52,6 +52,7 @@ class Animation {
 
 	/** @param target After the first and before the last value.
 	 * @returns index of first value greater than the target. */
+	@:dox(hide)
 	public static function binarySearch(values:Array<Float>, target:Float, step:Int = 1):Int {
 		var low = 0;
 		var high = Std.int(values.length / step - 2);
@@ -67,16 +68,6 @@ class Animation {
 				return (low + 1) * step;
 			current = (low + high) >>> 1;
 		}
-	}
-
-	public static function linearSearch(values:Array<Float>, target:Float, step:Int) {
-		var i = 0, last = values.length - step;
-		while (i <= last) {
-			if (values[i] > target)
-				return i;
-			i += step;
-		}
-		return -1;
 	}
 }
 
