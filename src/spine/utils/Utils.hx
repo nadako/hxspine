@@ -48,6 +48,7 @@ class Utils {
 	}
 
 	// This function is used to fix WebKit 602 specific issue described at http://esotericsoftware.com/forum/iOS-10-disappearing-graphics-10109
+	#if js @:pure(false) #else extern inline #end
 	public static function webkit602BugfixHelper(alpha:Float, blend:MixBlend) {}
 
 	static final _f32 = new Float32Array(1);
