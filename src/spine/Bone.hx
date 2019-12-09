@@ -10,83 +10,88 @@ import spine.utils.Vector2;
  * constraint or application code modifies the world transform after it was computed from the local transform. */
 class Bone implements Updatable {
 	/** The bone's setup pose data. */
-	public var data:BoneData;
+	public final data:BoneData;
 
 	/** The skeleton this bone belongs to. */
-	public var skeleton:Skeleton;
+	public final skeleton:Skeleton;
 
 	/** The parent bone, or null if this is the root bone. */
-	public var parent:Bone;
+	public final parent:Null<Bone>;
 
 	/** The immediate children of this bone. */
-	public var children = new Array<Bone>();
+	public final children = new Array<Bone>();
 
 	/** The local x translation. */
-	public var x = 0.0;
+	public var x:Float = 0.0;
 
 	/** The local y translation. */
-	public var y = 0.0;
+	public var y:Float = 0.0;
 
 	/** The local rotation in degrees, counter clockwise. */
-	public var rotation = 0.0;
+	public var rotation:Float = 0.0;
 
 	/** The local scaleX. */
-	public var scaleX = 0.0;
+	public var scaleX:Float = 0.0;
 
 	/** The local scaleY. */
-	public var scaleY = 0.0;
+	public var scaleY:Float = 0.0;
 
 	/** The local shearX. */
-	public var shearX = 0.0;
+	public var shearX:Float = 0.0;
 
 	/** The local shearY. */
-	public var shearY = 0.0;
+	public var shearY:Float = 0.0;
 
 	/** The applied local x translation. */
-	public var ax = 0.0;
+	public var ax:Float = 0.0;
 
 	/** The applied local y translation. */
-	public var ay = 0.0;
+	public var ay:Float = 0.0;
 
 	/** The applied local rotation in degrees, counter clockwise. */
-	public var arotation = 0.0;
+	public var arotation:Float = 0.0;
 
 	/** The applied local scaleX. */
-	public var ascaleX = 0.0;
+	public var ascaleX:Float = 0.0;
 
 	/** The applied local scaleY. */
-	public var ascaleY = 0.0;
+	public var ascaleY:Float = 0.0;
 
 	/** The applied local shearX. */
-	public var ashearX = 0.0;
+	public var ashearX:Float = 0.0;
 
 	/** The applied local shearY. */
-	public var ashearY = 0.0;
+	public var ashearY:Float = 0.0;
 
 	/** If true, the applied transform matches the world transform. If false, the world transform has been modified since it was
-	 * computed and {@link #updateAppliedTransform()} must be called before accessing the applied transform. */
-	public var appliedValid = false;
+	 * computed and `updateAppliedTransform` must be called before accessing the applied transform. */
+	public var appliedValid:Bool = false;
 
-	/** Part of the world transform matrix for the X axis. If changed, {@link #appliedValid} should be set to false. */
-	public var a = 0.0;
+	/** Part of the world transform matrix for the X axis. If changed, `appliedValid` should be set to false. */
+	public var a:Float = 0.0;
 
-	/** Part of the world transform matrix for the Y axis. If changed, {@link #appliedValid} should be set to false. */
-	public var b = 0.0;
+	/** Part of the world transform matrix for the Y axis. If changed, `appliedValid` should be set to false. */
+	public var b:Float = 0.0;
 
-	/** Part of the world transform matrix for the X axis. If changed, {@link #appliedValid} should be set to false. */
-	public var c = 0.0;
+	/** Part of the world transform matrix for the X axis. If changed, `appliedValid` should be set to false. */
+	public var c:Float = 0.0;
 
-	/** Part of the world transform matrix for the Y axis. If changed, {@link #appliedValid} should be set to false. */
-	public var d = 0.0;
+	/** Part of the world transform matrix for the Y axis. If changed, `appliedValid` should be set to false. */
+	public var d:Float = 0.0;
 
-	/** The world X position. If changed, {@link #appliedValid} should be set to false. */
-	public var worldY = 0.0;
+	/** The world X position. If changed, `appliedValid` should be set to false. */
+	public var worldY:Float = 0.0;
 
-	/** The world Y position. If changed, {@link #appliedValid} should be set to false. */
-	public var worldX = 0.0;
+	/** The world Y position. If changed, `appliedValid` should be set to false. */
+	public var worldX:Float = 0.0;
 
-	public var sorted = false;
-	public var active = false;
+	/** Returns false when the bone has not been computed because `BoneData.skinRequired` is true and the
+	 * active `Skeleton.skin` skin does not contain this bone in `Skin.bones`. */
+	@:allow(spine.Skeleton)
+	public var active(default,null):Bool = false;
+
+	@:allow(spine.Skeleton)
+	var sorted:Bool = false;
 
 	public function new(data:BoneData, skeleton:Skeleton, parent:Null<Bone>) {
 		if (data == null)
@@ -99,20 +104,20 @@ class Bone implements Updatable {
 		setToSetupPose();
 	}
 
-	/** Returns false when the bone has not been computed because {@link BoneData#skinRequired} is true and the
-	 * {@link Skeleton#skin active skin} does not {@link Skin#bones contain} this bone. */
+	/** Returns false when the bone has not been computed because `BoneData.skinRequired` is true and the
+	 * active `Skeleton.skin` skin does not contain this bone in `Skin.bones`. */
 	public inline function isActive():Bool {
 		return active;
 	}
 
-	/** Same as {@link #updateWorldTransform()}. This method exists for Bone to implement {@link Updatable}. */
-	public function update() {
+	/** Same as `updateWorldTransform`. This method exists for Bone to implement `Updatable`. */
+	public inline function update() {
 		updateWorldTransformWith(x, y, rotation, scaleX, scaleY, shearX, shearY);
 	}
 
 	/** Computes the world transform using the parent bone and this bone's local transform.
 	 *
-	 * See {@link #updateWorldTransformWith()}. */
+	 * See `updateWorldTransformWith`. */
 	public function updateWorldTransform() {
 		updateWorldTransformWith(x, y, rotation, scaleX, scaleY, shearX, shearY);
 	}
@@ -235,31 +240,31 @@ class Bone implements Updatable {
 		this.shearY = data.shearY;
 	}
 
-	/** The world rotation for the X axis, calculated using {@link #a} and {@link #c}. */
-	public function getWorldRotationX() {
+	/** The world rotation for the X axis, calculated using `a` and `c. */
+	public function getWorldRotationX():Float {
 		return Math.atan2(this.c, this.a) * MathUtils.radDeg;
 	}
 
-	/** The world rotation for the Y axis, calculated using {@link #b} and {@link #d}. */
-	public function getWorldRotationY() {
+	/** The world rotation for the Y axis, calculated using `b` and `d. */
+	public function getWorldRotationY():Float {
 		return Math.atan2(this.d, this.b) * MathUtils.radDeg;
 	}
 
-	/** The magnitude (always positive) of the world scale X, calculated using {@link #a} and {@link #c}. */
-	public function getWorldScaleX() {
+	/** The magnitude (always positive) of the world scale X, calculated using `a` and `c`. */
+	public function getWorldScaleX():Float {
 		return Math.sqrt(this.a * this.a + this.c * this.c);
 	}
 
-	/** The magnitude (always positive) of the world scale Y, calculated using {@link #b} and {@link #d}. */
-	public function getWorldScaleY() {
+	/** The magnitude (always positive) of the world scale Y, calculated using `b` and `d`. */
+	public function getWorldScaleY():Float {
 		return Math.sqrt(this.b * this.b + this.d * this.d);
 	}
 
 	/** Computes the applied transform values from the world transform. This allows the applied transform to be accessed after the
-	 * world transform has been modified (by a constraint, {@link #rotateWorld()}, etc).
+	 * world transform has been modified (by a constraint, `rotateWorld`, etc).
 	 *
-	 * If {@link #updateWorldTransform()} has been called for a bone and {@link #appliedValid} is false, then
-	 * {@link #updateAppliedTransform()} must be called before accessing the applied transform.
+	 * If `updateWorldTransform` has been called for a bone and `appliedValid` is false, then
+	 * `updateAppliedTransform` must be called before accessing the applied transform.
 	 *
 	 * Some information is ambiguous in the world transform, such as -1,-1 scale versus 180 rotation. The applied transform after
 	 * calling this method is equivalent to the local tranform used to compute the world transform, but may not be identical. */
@@ -305,7 +310,7 @@ class Bone implements Updatable {
 	}
 
 	/** Transforms a point from world coordinates to the bone's local coordinates. */
-	public function worldToLocal(world:Vector2) {
+	public function worldToLocal(world:Vector2):Vector2 {
 		var a = this.a, b = this.b, c = this.c, d = this.d;
 		var invDet = 1 / (a * d - b * c);
 		var x = world.x - this.worldX, y = world.y - this.worldY;
@@ -315,7 +320,7 @@ class Bone implements Updatable {
 	}
 
 	/** Transforms a point from the bone's local coordinates to world coordinates. */
-	public function localToWorld(local:Vector2) {
+	public function localToWorld(local:Vector2):Vector2 {
 		var x = local.x, y = local.y;
 		local.x = x * this.a + y * this.b + this.worldX;
 		local.y = x * this.c + y * this.d + this.worldY;
@@ -323,22 +328,22 @@ class Bone implements Updatable {
 	}
 
 	/** Transforms a world rotation to a local rotation. */
-	public function worldToLocalRotation(worldRotation:Float) {
+	public function worldToLocalRotation(worldRotation:Float):Float {
 		var sin = MathUtils.sinDeg(worldRotation),
 			cos = MathUtils.cosDeg(worldRotation);
 		return Math.atan2(this.a * sin - this.c * cos, this.d * cos - this.b * sin) * MathUtils.radDeg + this.rotation - this.shearX;
 	}
 
 	/** Transforms a local rotation to a world rotation. */
-	public function localToWorldRotation(localRotation:Float) {
+	public function localToWorldRotation(localRotation:Float):Float {
 		localRotation -= this.rotation - this.shearX;
 		var sin = MathUtils.sinDeg(localRotation),
 			cos = MathUtils.cosDeg(localRotation);
 		return Math.atan2(cos * this.c + sin * this.d, cos * this.a + sin * this.b) * MathUtils.radDeg;
 	}
 
-	/** Rotates the world transform the specified amount and sets {@link #appliedValid} to false.
-	 * {@link #updateWorldTransform()} will need to be called on any child bones, recursively, and any constraints reapplied. */
+	/** Rotates the world transform the specified amount and sets `appliedValid` to false.
+	 * `updateWorldTransform` will need to be called on any child bones, recursively, and any constraints reapplied. */
 	public function rotateWorld(degrees:Float) {
 		var a = this.a, b = this.b, c = this.c, d = this.d;
 		var cos = MathUtils.cosDeg(degrees), sin = MathUtils.sinDeg(degrees);
