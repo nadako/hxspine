@@ -124,7 +124,7 @@ class SkeletonBinary {
 			data.target = skeletonData.bones[input.readInt(true)];
 			data.mix = input.readFloat();
 			data.softness = input.readFloat() * scale;
-			data.bendDirection = input.readByte();
+			data.bendDirection = readBendDirection(input);
 			data.compress = input.readBoolean();
 			data.stretch = input.readBoolean();
 			data.uniform = input.readBoolean();
@@ -499,6 +499,11 @@ class SkeletonBinary {
 		return array;
 	}
 
+	inline function readBendDirection(input:BinaryInput):Int {
+		// signed byte workaround
+		return input.readByte() == 0xFF ? -1 : 1;
+	}
+
 	function readAnimation(input:BinaryInput, name:String, skeletonData:SkeletonData):Animation {
 		var timelines = new Array<Timeline>();
 		var scale = this.scale;
@@ -607,7 +612,7 @@ class SkeletonBinary {
 			var timeline = new IkConstraintTimeline(frameCount);
 			timeline.ikConstraintIndex = index;
 			for (frameIndex in 0...frameCount) {
-				timeline.setFrame(frameIndex, input.readFloat(), input.readFloat(), input.readFloat() * scale, input.readByte(), input.readBoolean(),
+				timeline.setFrame(frameIndex, input.readFloat(), input.readFloat(), input.readFloat() * scale, readBendDirection(input), input.readBoolean(),
 					input.readBoolean());
 				if (frameIndex < frameCount - 1)
 					this.readCurve(input, frameIndex, timeline);
