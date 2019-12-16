@@ -10,12 +10,15 @@ class SkeletonClipping {
 	var clipOutput = new Array<Float>();
 
 	public var clippedVertices = new Array<Float>();
-	public var clippedTriangles = new Array<Float>();
+	public var clippedTriangles = new Array<Int>();
 
 	var scratch = new Array<Float>();
 
 	var clipAttachment:ClippingAttachment;
 	var clippingPolygons:Array<Array<Float>>;
+
+	public function new() {
+	}
 
 	public function clipStart(slot:Slot, clip:ClippingAttachment):Int {
 		if (this.clipAttachment != null)

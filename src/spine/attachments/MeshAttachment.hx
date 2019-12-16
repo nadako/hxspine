@@ -36,7 +36,7 @@ class MeshAttachment extends VertexAttachment {
 	public var height:Float;
 
 	/** The number of entries at the beginning of `vertices` that make up the mesh hull. */
-	public var hullLength:Float;
+	public var hullLength:Int;
 
 	/** Vertex index pairs describing edges for controling triangulation. Mesh triangles will never cross edges. Only available if
 	 * nonessential data was exported. Triangulation is not performed at runtime. */
