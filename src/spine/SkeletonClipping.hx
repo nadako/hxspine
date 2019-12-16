@@ -10,7 +10,7 @@ class SkeletonClipping {
 	var clipOutput = new Array<Float>();
 
 	public var clippedVertices = new Array<Float>();
-	public var clippedTriangles = new Array<Float>();
+	public var clippedTriangles = new Array<Int>();
 
 	var scratch = new Array<Float>();
 

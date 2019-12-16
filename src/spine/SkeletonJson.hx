@@ -657,7 +657,7 @@ class SkeletonJson {
 					mesh.updateUVs();
 
 					mesh.edges = this.getValue(map, "edges", null);
-					mesh.hullLength = this.getValue(map, "hull", 0.0) * 2;
+					mesh.hullLength = this.getValue(map, "hull", 0) * 2;
 					return mesh;
 				}
 			case "path":
