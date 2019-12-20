@@ -56,6 +56,8 @@ class SkeletonBinary {
 
 		skeletonData.hash = input.readString();
 		skeletonData.version = input.readString();
+		if (skeletonData.version == "3.8.75")
+			throw new Error("Unsupported skeleton data, please export with a newer version of Spine.");
 		skeletonData.x = input.readFloat();
 		skeletonData.y = input.readFloat();
 		skeletonData.width = input.readFloat();

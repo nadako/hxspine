@@ -325,6 +325,8 @@ class SkeletonJson {
 		if (skeletonMap != null) {
 			skeletonData.hash = skeletonMap.hash;
 			skeletonData.version = skeletonMap.spine;
+			if (skeletonData.version == "3.8.75")
+				throw new Error("Unsupported skeleton data, please export with a newer version of Spine.");
 			skeletonData.x = skeletonMap.x;
 			skeletonData.y = skeletonMap.y;
 			skeletonData.width = skeletonMap.width;

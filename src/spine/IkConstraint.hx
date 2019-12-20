@@ -76,11 +76,33 @@ class IkConstraint implements Updatable {
 		if (!bone.appliedValid)
 			bone.updateAppliedTransform();
 		var p = bone.parent;
-		var id = 1 / (p.a * p.d - p.b * p.c);
-		var x = targetX - p.worldX, y = targetY - p.worldY;
-		var tx = (x * p.d - y * p.b) * id - bone.ax,
-			ty = (y * p.a - x * p.c) * id - bone.ay;
-		var rotationIK = Math.atan2(ty, tx) * MathUtils.radDeg - bone.ashearX - bone.arotation;
+
+		var pa = p.a, pb = p.b, pc = p.c, pd = p.d;
+		var rotationIK = -bone.ashearX - bone.arotation, tx = 0, ty = 0;
+
+		var tx, ty;
+		switch (bone.data.transformMode) {
+			case OnlyTranslation:
+				tx = targetX - bone.worldX;
+				ty = targetY - bone.worldY;
+			case NoRotationOrReflection:
+				rotationIK += Math.atan2(pc, pa) * MathUtils.radDeg;
+				var ps = Math.abs(pa * pd - pb * pc) / (pa * pa + pc * pc);
+				pb = -pc * ps;
+				pd = pa * ps;
+				// Fall through was here
+				var x = targetX - p.worldX, y = targetY - p.worldY;
+				var d = pa * pd - pb * pc;
+				tx = (x * pd - y * pb) / d - bone.ax;
+				ty = (y * pa - x * pc) / d - bone.ay;
+			default:
+				var x = targetX - p.worldX, y = targetY - p.worldY;
+				var d = pa * pd - pb * pc;
+				tx = (x * pd - y * pb) / d - bone.ax;
+				ty = (y * pa - x * pc) / d - bone.ay;
+		}
+		rotationIK += Math.atan2(ty, tx) * MathUtils.radDeg;
+
 		if (bone.ascaleX < 0)
 			rotationIK += 180;
 		if (rotationIK > 180)
@@ -89,6 +111,12 @@ class IkConstraint implements Updatable {
 			rotationIK += 360;
 		var sx = bone.ascaleX, sy = bone.ascaleY;
 		if (compress || stretch) {
+			switch (bone.data.transformMode) {
+				case NoScale | NoScaleOrReflection:
+					tx = targetX - bone.worldX;
+					ty = targetY - bone.worldY;
+				case _:
+			}
 			var b = bone.data.length * sx, dd = Math.sqrt(tx * tx + ty * ty);
 			if ((compress && dd < b) || (stretch && dd > b) && b > 0.0001) {
 				var s = (dd / b - 1) * alpha + 1;
