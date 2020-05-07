@@ -47,14 +47,6 @@ class AnimationState {
 	 * place. */
 	static inline final HOLD_MIX = 3;
 
-	/** 1. An attachment timeline in a subsequent track entry sets the attachment for the same slot as this attachment
-	 * timeline.
-	 *
-	 * Result: This attachment timeline will not use MixDirection.out, which would otherwise show the setup mode attachment (or
-	 * none if not visible in setup mode). This allows deform timelines to be applied for the subsequent entry to mix from, rather
-	 * than mixing from the setup pose. */
-	static inline final LAST = 4;
-
 	static inline final SETUP = 1;
 	static inline final CURRENT = 2;
 
@@ -227,7 +219,7 @@ class AnimationState {
 
 				for (ii in 0...timelineCount) {
 					var timeline = timelines[ii];
-					var timelineBlend = (timelineMode[ii] & (AnimationState.LAST - 1)) == AnimationState.SUBSEQUENT ? blend : MixBlend.setup;
+					var timelineBlend = timelineMode[ii] == AnimationState.SUBSEQUENT ? blend : MixBlend.setup;
 					if (Std.is(timeline, RotateTimeline)) {
 						applyRotateTimeline(timeline, skeleton, animationTime, mix, timelineBlend, timelinesRotation, ii << 1, firstFrame);
 					} else if (Std.is(timeline, AttachmentTimeline)) {
@@ -308,7 +300,7 @@ class AnimationState {
 				var direction = MixDirection.mixOut;
 				var timelineBlend:MixBlend;
 				var alpha = 0.0;
-				switch (timelineMode[i] & (AnimationState.LAST - 1)) {
+				switch (timelineMode[i]) {
 					case AnimationState.SUBSEQUENT:
 						if (!drawOrder && Std.is(timeline, DrawOrderTimeline))
 							continue;
@@ -329,12 +321,9 @@ class AnimationState {
 
 				if (Std.is(timeline, RotateTimeline))
 					this.applyRotateTimeline(timeline, skeleton, animationTime, alpha, timelineBlend, timelinesRotation, i << 1, firstFrame);
-				else if (Std.is(timeline, AttachmentTimeline)) {
-					// If not showing attachments: do nothing if this is the last timeline, else apply the timeline so
-					// subsequent timelines see any deform, but don't set attachmentState to Current.
-					if (!attachments && (timelineMode[i] & AnimationState.LAST) != 0) continue;
+				else if (Std.is(timeline, AttachmentTimeline))
 					this.applyAttachmentTimeline(cast timeline, skeleton, animationTime, timelineBlend, attachments);
-				} else {
+				else {
 					// This fixes the WebKit 602 specific issue described at http://esotericsoftware.com/forum/iOS-10-disappearing-graphics-10109
 					Utils.webkit602BugfixHelper(alpha, blend);
 					if (drawOrder && Std.is(timeline, DrawOrderTimeline) && timelineBlend == MixBlend.setup)
@@ -774,16 +763,6 @@ class AnimationState {
 				entry = entry.mixingTo;
 			} while (entry != null);
 		}
-
-		this.propertyIDs.clear();
-		var i = this.tracks.length - 1;
-		while (i >= 0) {
-			var entry = this.tracks[i--];
-			while (entry != null) {
-				this.computeNotLast(entry);
-				entry = entry.mixingFrom;
-			}
-		}
 	}
 
 	function computeHold(entry:TrackEntry) {
@@ -832,21 +811,6 @@ class AnimationState {
 				if (continueOuter)
 					continue;
 				timelineMode[i] = AnimationState.HOLD;
-			}
-		}
-	}
-
-	function computeNotLast(entry:TrackEntry) {
-		var timelines = entry.animation.timelines;
-		var timelinesCount = entry.animation.timelines.length;
-		var timelineMode = entry.timelineMode;
-		var propertyIDs = this.propertyIDs;
-
-		for (i in 0...timelinesCount) {
-			if (Std.is(timelines[i], AttachmentTimeline)) {
-				var timeline:AttachmentTimeline = cast timelines[i];
-				if (!propertyIDs.add(timeline.slotIndex))
-					timelineMode[i] |= AnimationState.LAST;
 			}
 		}
 	}
