@@ -812,18 +812,15 @@ class AttachmentTimeline implements Timeline {
 		var slot = skeleton.slots[this.slotIndex];
 		if (!slot.bone.active)
 			return;
-		if (direction == MixDirection.mixOut && blend == MixBlend.setup) {
-			var attachmentName = slot.data.attachmentName;
-			slot.setAttachment(attachmentName == null ? null : skeleton.getAttachment(this.slotIndex, attachmentName));
+		if (direction == MixDirection.mixOut) {
+			if (blend == MixBlend.setup)
+				setAttachment(skeleton, slot, slot.data.attachmentName);
 			return;
 		}
 
 		var frames = this.frames;
 		if (time < frames[0]) {
-			if (blend == MixBlend.setup || blend == MixBlend.first) {
-				var attachmentName = slot.data.attachmentName;
-				slot.setAttachment(attachmentName == null ? null : skeleton.getAttachment(this.slotIndex, attachmentName));
-			}
+			if (blend == MixBlend.setup || blend == MixBlend.first) setAttachment(skeleton, slot, slot.data.attachmentName);
 			return;
 		}
 
@@ -835,6 +832,10 @@ class AttachmentTimeline implements Timeline {
 
 		var attachmentName = this.attachmentNames[frameIndex];
 		skeleton.slots[this.slotIndex].setAttachment(attachmentName == null ? null : skeleton.getAttachment(this.slotIndex, attachmentName));
+	}
+
+	function setAttachment(skeleton:Skeleton, slot:Slot, attachmentName:String) {
+		slot.attachment = attachmentName == null ? null : skeleton.getAttachment(this.slotIndex, attachmentName);
 	}
 }
 
@@ -1145,8 +1146,8 @@ class DrawOrderTimeline implements Timeline {
 	public function apply(skeleton:Skeleton, lastTime:Float, time:Float, firedEvents:Array<Event>, alpha:Float, blend:MixBlend, direction:MixDirection) {
 		var drawOrder = skeleton.drawOrder;
 		var slots = skeleton.slots;
-		if (direction == MixDirection.mixOut && blend == MixBlend.setup) {
-			Utils.arrayCopy(skeleton.slots, 0, skeleton.drawOrder, 0, skeleton.slots.length);
+		if (direction == MixDirection.mixOut) {
+			if (blend == MixBlend.setup) Utils.arrayCopy(skeleton.slots, 0, skeleton.drawOrder, 0, skeleton.slots.length);
 			return;
 		}
 

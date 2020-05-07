@@ -21,8 +21,10 @@ class Slot {
 	 * color's alpha is not used. */
 	public var darkColor:Null<Color>;
 
-	var attachment:Null<Attachment>;
+	public var attachment:Null<Attachment>;
 	var attachmentTime:Float;
+
+	public var attachmentState:Float;
 
 	/** Values to deform the slot's attachment. For an unweighted mesh, the entries are local positions for each vertex. For a
 	 * weighted mesh, the entries are an offset for each vertex which will be added to the mesh's local vertex positions.
