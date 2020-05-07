@@ -197,6 +197,7 @@ class Bone implements Updatable {
 				this.b = pa * lb - pb * ld;
 				this.c = pc * la + pd * lc;
 				this.d = pc * lb + pd * ld;
+				return;
 			case NoScale | NoScaleOrReflection:
 				var cos = MathUtils.cosDeg(rotation);
 				var sin = MathUtils.sinDeg(rotation);
