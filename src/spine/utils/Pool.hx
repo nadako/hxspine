@@ -21,10 +21,8 @@ class Pool<T> {
 	}
 
 	public function freeAll(items:Array<T>) {
-		for (i in 0...items.length) {
-			if (reset != null)
-				reset(items[i]);
-			this.items[i] = items[i];
+		for (item in items) {
+			free(item);
 		}
 	}
 
