@@ -179,6 +179,8 @@ class Bone implements Updatable {
 				var prx = 0.0;
 				if (s > 0.0001) {
 					s = Math.abs(pa * pd - pb * pc) / s;
+					pa /= skeleton.scaleX;
+					pc /= skeleton.scaleY;
 					pb = pc * s;
 					pd = pa * s;
 					prx = Math.atan2(pc, pa) * MathUtils.radDeg;
@@ -197,7 +199,6 @@ class Bone implements Updatable {
 				this.b = pa * lb - pb * ld;
 				this.c = pc * la + pd * lc;
 				this.d = pc * lb + pd * ld;
-				return;
 			case NoScale | NoScaleOrReflection:
 				var cos = MathUtils.cosDeg(rotation);
 				var sin = MathUtils.sinDeg(rotation);
