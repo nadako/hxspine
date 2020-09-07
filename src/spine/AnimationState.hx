@@ -25,13 +25,19 @@ class AnimationState {
 	 * Result: Mix from the setup pose to the timeline pose. */
 	static inline final FIRST = 1;
 
-	/** 1. This is the first timeline to set this property.
-	 * 2. The next track entry to be applied does have a timeline to set this property.
-	 * 3. The next track entry after that one does not have a timeline to set this property.
-	 *
+	/** 1) A previously applied timeline has set this property.<br>
+	 * 2) The next track entry to be applied does have a timeline to set this property.<br>
+	 * 3) The next track entry after that one does not have a timeline to set this property.<br>
+	 * Result: Mix from the current pose to the timeline pose, but do not mix out. This avoids "dipping" when crossfading
+	 * animations that key the same property. A subsequent timeline will set this property using a mix. */
+	static inline final HOLD_SUBSEQUENT = 2;
+
+	/** 1) This is the first timeline to set this property.<br>
+	 * 2) The next track entry to be applied does have a timeline to set this property.<br>
+	 * 3) The next track entry after that one does not have a timeline to set this property.<br>
 	 * Result: Mix from the setup pose to the timeline pose, but do not mix out. This avoids "dipping" when crossfading animations
 	 * that key the same property. A subsequent timeline will set this property using a mix. */
-	static inline final HOLD = 2;
+	static inline final HOLD_FIRST = 3;
 
 	/** 1. This is the first timeline to set this property.
 	 * 2. The next track entry to be applied does have a timeline to set this property.
@@ -45,7 +51,7 @@ class AnimationState {
 	 * "dipping" A is not mixed out, however D (the first entry that doesn't set the property) mixing in is used to mix out A
 	 * (which affects B and C). Without using D to mix out, A would be applied fully until mixing completes, then snap into
 	 * place. */
-	static inline final HOLD_MIX = 3;
+	static inline final HOLD_MIX = 4;
 
 	static inline final SETUP = 1;
 	static inline final CURRENT = 2;
@@ -250,7 +256,7 @@ class AnimationState {
 			}
 		}
 		this.unkeyedState += 2; // Increasing after each use avoids the need to reset attachmentState for every slot.
-		
+
 		this.queue.drain();
 		return applied;
 	}
@@ -309,7 +315,10 @@ class AnimationState {
 					case AnimationState.FIRST:
 						timelineBlend = MixBlend.setup;
 						alpha = alphaMix;
-					case AnimationState.HOLD:
+					case AnimationState.HOLD_SUBSEQUENT:
+						timelineBlend = blend;
+						alpha = alphaHold;
+					case AnimationState.HOLD_FIRST:
 						timelineBlend = MixBlend.setup;
 						alpha = alphaHold;
 					default:
@@ -776,8 +785,7 @@ class AnimationState {
 
 		if (to != null && to.holdPrevious) {
 			for (i in 0...timelinesCount) {
-				propertyIDs.add(timelines[i].getPropertyId());
-				timelineMode[i] = AnimationState.HOLD;
+				timelineMode[i] = propertyIDs.add(timelines[i].getPropertyId()) ? AnimationState.HOLD_FIRST : AnimationState.HOLD_SUBSEQUENT;
 			}
 			return;
 		}
@@ -810,7 +818,7 @@ class AnimationState {
 				}
 				if (continueOuter)
 					continue;
-				timelineMode[i] = AnimationState.HOLD;
+				timelineMode[i] = AnimationState.HOLD_FIRST;
 			}
 		}
 	}
