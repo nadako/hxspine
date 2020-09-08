@@ -137,7 +137,7 @@ class Bone implements Updatable {
 		this.appliedValid = true;
 
 		var sx = skeleton.scaleX;
-		var sy = skeleton.scaleY * -1;
+		var sy = skeleton.scaleY;
 
 		var parent = this.parent;
 		if (parent == null) { // Root bone.
