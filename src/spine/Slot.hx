@@ -21,7 +21,7 @@ class Slot {
 	 * color's alpha is not used. */
 	public var darkColor:Null<Color>;
 
-	public var attachment:Null<Attachment>;
+	var attachment:Null<Attachment>;
 	var attachmentTime:Float;
 
 	public var attachmentState:Float;

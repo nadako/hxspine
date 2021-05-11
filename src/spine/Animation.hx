@@ -835,7 +835,7 @@ class AttachmentTimeline implements Timeline {
 	}
 
 	function setAttachment(skeleton:Skeleton, slot:Slot, attachmentName:String) {
-		slot.attachment = attachmentName == null ? null : skeleton.getAttachment(this.slotIndex, attachmentName);
+		slot.setAttachment(attachmentName == null ? null : skeleton.getAttachment(this.slotIndex, attachmentName));
 	}
 }
 
