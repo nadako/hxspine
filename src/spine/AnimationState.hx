@@ -375,7 +375,7 @@ class AnimationState {
 	}
 
 	function setAttachment(skeleton: Skeleton, slot: Slot, attachmentName: String, attachments: Bool) {
-		slot.attachment = attachmentName == null ? null : skeleton.getAttachment(slot.data.index, attachmentName);
+		slot.setAttachment(attachmentName == null ? null : skeleton.getAttachment(slot.data.index, attachmentName));
 		if (attachments) slot.attachmentState = this.unkeyedState + AnimationState.CURRENT;
 	}
 
